@@ -1,0 +1,72 @@
+# csmju-maintenance-request (ระบบแจ้งซ่อม) — ฐานข้อมูลของระบบนี้ (repair_db) + backend/frontend แบบ container
+#
+#   docker compose up -d db                 # เฉพาะฐานข้อมูล (พัฒนาในเครื่องด้วย pnpm dev:*)
+#   docker compose --profile app up -d      # รันทั้งระบบใน container
+#
+# Core Hub ไม่อยู่ในไฟล์นี้ — ใช้ตัวจริงที่ https://csmju2030.jowave.com (standards/docs/connect-core-hub.md)
+# ชื่อ project คงเป็น csmju-repair เพื่อให้ใช้ volume ฐานข้อมูลเดิมในเครื่องต่อได้
+name: csmju-repair
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: repair_db
+    ports:
+      # Windows บางเครื่องจอง 5433–5532 ไว้ (Hyper-V/WSL) — เปลี่ยนพอร์ตฝั่ง host ได้ด้วย REPAIR_DB_PORT ใน .env
+      - '${REPAIR_DB_PORT:-5434}:5432'
+    volumes:
+      - repair_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d repair_db']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    profiles: ['app']
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 4221
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/repair_db
+      CORE_HUB_URL: ${CORE_HUB_URL:-https://csmju2030.jowave.com}
+      CORE_HUB_JWKS_URL: ${CORE_HUB_JWKS_URL:-https://csmju2030.jowave.com/api/v1/.well-known/jwks.json}
+      CORE_HUB_WEB_URL: ${CORE_HUB_WEB_URL:-https://csmju2030.jowave.com}
+      CORE_HUB_ISSUER: core-hub
+      CORE_HUB_AUDIENCE: csmju2030
+      SUBSYSTEM_ID: csmju-maintenance-request
+      UPLOAD_DIR: /data/uploads
+    ports:
+      - '4221:4221'
+    volumes:
+      - repair_uploads:/data/uploads
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    profiles: ['app']
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_CORE_HUB_URL: ${NEXT_PUBLIC_CORE_HUB_URL:-https://csmju2030.jowave.com}
+        NEXT_PUBLIC_SUBSYSTEM_ID: csmju-maintenance-request
+        BACKEND_URL: http://backend:4221
+    environment:
+      BACKEND_URL: http://backend:4221
+    ports:
+      - '3221:3221'
+    depends_on:
+      - backend
+
+volumes:
+  repair_db_data:
+  repair_uploads:

@@ -1,0 +1,276 @@
+// csmju-repair — ฐานข้อมูลของระบบย่อยนี้เท่านั้น (repair_db)
+// ตาราง/คอลัมน์เป็น snake_case ผ่าน @@map/@map · field ใน Prisma เป็น camelCase
+// ผู้ใช้อ้างถึงด้วย core_user_id (claim `sub` จาก Core Hub) เท่านั้น — standards/docs/data-dictionary.md
+// ไม่เก็บชื่อ/อีเมล และไม่มีสำเนาข้อมูลอ้างอิงของ Core Hub (อาคาร) — เก็บแค่ person_code / building_code
+// (standards/docs/reference-data.md ข้อ 8)
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum RequestStatus {
+  PENDING // รอรับเรื่อง
+  ACCEPTED // รับเรื่องแล้ว
+  IN_PROGRESS // กำลังดำเนินการ
+  ON_HOLD // รออะไหล่ / พักงาน
+  COMPLETED // ซ่อมเสร็จ
+  REJECTED // ไม่สามารถดำเนินการได้
+  CANCELLED // ผู้แจ้งยกเลิก
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum ImageKind {
+  BEFORE // รูปที่ผู้แจ้งถ่ายตอนแจ้ง
+  AFTER // รูปหลังซ่อมโดยช่าง
+}
+
+/// ประเภทห้อง
+enum RoomType {
+  LAB // ห้องปฏิบัติการคอมพิวเตอร์
+  LECTURE // ห้องบรรยาย
+  NETWORK_LAB // ห้องปฏิบัติการเครือข่าย
+  MEETING // ห้องประชุม
+  OFFICE // ห้องพัก/สำนักงาน
+  OTHER // อื่นๆ
+}
+
+enum ActivityType {
+  CREATED
+  STATUS_CHANGED
+  ASSIGNED
+  UPDATED // เปลี่ยนความเร่งด่วน / หมวดหมู่
+  COMMENT
+  RATED
+  FOLLOWED // ผู้ใช้อื่นกด "ฉันก็เจอ" (แทนการแจ้งซ้ำ)
+}
+
+/// ข้อมูล local ของผู้ใช้ในระบบนี้ — ไม่ใช่ตาราง users: ไม่มีรหัสผ่าน ไม่มีการพิสูจน์ตัวตน ไม่เก็บชื่อหรืออีเมล
+/// ชื่อดูจาก Core Hub ตอนแสดงผล (GET /people/:personCode) · core_role เป็นสำเนาจาก token ที่ตรวจแล้ว (ใช้กรองช่าง)
+model Profile {
+  id             String    @id @default(uuid()) @db.Uuid
+  coreUserId     String    @unique @map("core_user_id") @db.VarChar(64)
+  /// รหัสนักศึกษา/บุคลากรจาก GET /people/me · null = บัญชียังไม่ผูกกับบุคคลในทะเบียนของ Core Hub
+  personCode     String?   @map("person_code") @db.VarChar(64)
+  coreRole       String    @map("core_role") @db.VarChar(10)
+  /// Layer 2: ผู้ดูแลระบบนี้แต่งตั้งบุคลากรเป็นช่าง (data-dictionary.md ข้อ 10 — Layer 2 Role เป็นของระบบย่อย)
+  isTechnician   Boolean   @default(false) @map("is_technician")
+  /// รูปโปรไฟล์ที่ผู้ใช้อัปโหลดในระบบนี้ (Core Hub v1.0 ยังไม่มีรูปผู้ใช้) — ชื่อไฟล์ใน UPLOAD_DIR
+  avatarFilename String?   @map("avatar_filename") @db.VarChar(100)
+  lastSeenAt     DateTime? @map("last_seen_at") @db.Timestamptz(3)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  reportedRequests RepairRequest[]   @relation("Reporter")
+  assignedRequests RepairRequest[]   @relation("Assignee")
+  activities       RequestActivity[]
+  uploadedImages   RepairImage[]
+  notifications    Notification[]
+  following        RequestFollower[]
+
+  @@index([personCode])
+  @@map("profiles")
+}
+
+/// หมวดหมู่งานซ่อม = ประเภทอุปกรณ์ของสาขา (คอมพิวเตอร์ · โปรเจกเตอร์ · แอร์ · พัดลม …)
+model Category {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @unique @db.VarChar(100)
+  /// อาการที่พบบ่อย — หน้าแจ้งซ่อมแสดงเป็นปุ่มให้กดเลือก (แจ้งได้ในไม่กี่คลิก)
+  symptoms  String[] @default([]) @db.VarChar(100)
+  /// ชื่อไอคอนที่หน้าเว็บใช้ (computer · monitor · projector · aircon · fan · light · network · audio · furniture · other)
+  icon      String   @default("other") @db.VarChar(20)
+  sortOrder Int      @default(0) @map("sort_order") @db.SmallInt
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  requests  RepairRequest[]
+  equipment Equipment[]
+
+  @@map("categories")
+}
+
+/// ห้องที่รับแจ้งซ่อม — ผู้ดูแลระบบแจ้งซ่อมสร้างเอง (อาคารเป็น code ของ Core Hub)
+/// ⚠️ เบี่ยงจาก reference-data.md ข้อ 8 (ห้องเป็นข้อมูลอ้างอิงของ Core Hub) ตามคำขอของเจ้าของระบบ — ดู REPORT.md
+model Room {
+  id           String   @id @default(uuid()) @db.Uuid
+  /// code ของอาคารใน Core Hub (GET /api/v1/buildings) เช่น CS
+  buildingCode String   @map("building_code") @db.VarChar(50)
+  /// รหัสห้องที่ใช้ในสาขา เช่น CS-201
+  code         String   @unique @db.VarChar(30)
+  name         String   @db.VarChar(150)
+  floor        Int?     @db.SmallInt
+  description  String?  @db.VarChar(500)
+  roomType     RoomType @default(LAB) @map("room_type")
+  /// จำนวนที่นั่ง
+  capacity     Int?
+  /// รูปห้อง — ชื่อไฟล์ใน UPLOAD_DIR
+  photoFilename String? @map("photo_filename") @db.VarChar(100)
+  /// รหัสสั้นใน QR ของห้อง (/q/<qrCode>)
+  qrCode       String   @unique @map("qr_code") @db.VarChar(16)
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  equipment Equipment[]
+  requests  RepairRequest[]
+
+  @@index([buildingCode])
+  @@map("rooms")
+}
+
+/// เครื่อง/อุปกรณ์ในห้อง (คอมแต่ละเครื่อง · พัดลมแต่ละตัว …) — ผู้ดูแลระบบเพิ่ม · มี QR ของตัวเอง
+model Equipment {
+  id          String   @id @default(uuid()) @db.Uuid
+  roomId      String   @map("room_id") @db.Uuid
+  categoryId  String   @map("category_id") @db.Uuid
+  /// ป้ายที่ติดบนเครื่อง ไม่ซ้ำในห้องเดียวกัน เช่น PC-01 · FAN-2
+  label       String   @db.VarChar(30)
+  /// ชื่อ/รุ่น เช่น Dell OptiPlex 7090
+  name        String   @db.VarChar(150)
+  assetNumber String?  @map("asset_number") @db.VarChar(50)
+  /// รายละเอียดเครื่อง (CPU · RAM · ปีที่ซื้อ …) หลายบรรทัด
+  specs       String?  @db.VarChar(1000)
+  /// ตำแหน่งในห้อง เช่น แถว 2 ที่ 3
+  position    String?  @db.VarChar(50)
+  /// รูปเครื่อง — ชื่อไฟล์ใน UPLOAD_DIR
+  photoFilename String? @map("photo_filename") @db.VarChar(100)
+  /// รหัสสั้นใน QR ของเครื่อง (/q/<qrCode>)
+  qrCode      String   @unique @map("qr_code") @db.VarChar(16)
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  room     Room            @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  category Category        @relation(fields: [categoryId], references: [id])
+  requests RepairRequest[]
+
+  @@unique([roomId, label])
+  @@index([categoryId])
+  @@map("equipment")
+}
+
+model RepairRequest {
+  id                 String        @id @default(uuid()) @db.Uuid
+  code               String        @unique @db.VarChar(20) // เลขที่ใบแจ้งซ่อม RP-<ปีพ.ศ.2หลัก><เดือน>-<ลำดับ> เช่น RP-6909-0001
+  equipment          String        @db.VarChar(150)
+  assetNumber        String?       @map("asset_number") @db.VarChar(50)
+  description        String        @db.VarChar(2000)
+  floor              Int?          @db.SmallInt
+  location           String        @db.VarChar(150)
+  priority           Priority      @default(MEDIUM)
+  status             RequestStatus @default(PENDING)
+  rating             Int?          @db.SmallInt
+  feedback           String?       @db.VarChar(500)
+  /// กำหนดเสร็จตาม SLA ของระดับความเร่งด่วน (คำนวณใหม่เมื่อเปลี่ยน priority)
+  dueAt              DateTime      @map("due_at") @db.Timestamptz(3)
+  acceptedAt         DateTime?     @map("accepted_at") @db.Timestamptz(3)
+  completedAt        DateTime?     @map("completed_at") @db.Timestamptz(3)
+  /// ผู้แจ้ง (เจ้าของใบแจ้งซ่อม — record.core_user_id === token.sub)
+  coreUserId         String        @map("core_user_id") @db.VarChar(64)
+  assigneeCoreUserId String?       @map("assignee_core_user_id") @db.VarChar(64)
+  /// code ของอาคารใน Core Hub (GET /api/v1/buildings) เช่น CS
+  buildingCode       String        @map("building_code") @db.VarChar(50)
+  categoryId         String        @map("category_id") @db.Uuid
+  /// ห้อง/เครื่องที่แจ้ง (null = แจ้งแบบระบุสถานที่เอง) · ข้อความ location/equipment เก็บไว้เป็นประวัติเสมอ
+  roomId             String?       @map("room_id") @db.Uuid
+  equipmentId        String?       @map("equipment_id") @db.Uuid
+  createdAt          DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  reporter   Profile           @relation("Reporter", fields: [coreUserId], references: [coreUserId])
+  assignee   Profile?          @relation("Assignee", fields: [assigneeCoreUserId], references: [coreUserId])
+  category   Category          @relation(fields: [categoryId], references: [id])
+  room       Room?             @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  item       Equipment?        @relation(fields: [equipmentId], references: [id], onDelete: SetNull)
+  images     RepairImage[]
+  activities RequestActivity[]
+  followers  RequestFollower[]
+
+  @@index([status, dueAt])
+  @@index([coreUserId, createdAt])
+  @@index([assigneeCoreUserId, status])
+  @@index([createdAt])
+  @@index([buildingCode])
+  @@index([equipmentId, status])
+  @@index([roomId, status])
+  @@map("repair_requests")
+}
+
+model RepairImage {
+  id                 String    @id @default(uuid()) @db.Uuid
+  filename           String    @unique @db.VarChar(100)
+  mimeType           String    @map("mime_type") @db.VarChar(50)
+  size               Int
+  kind               ImageKind @default(BEFORE)
+  repairRequestId    String    @map("repair_request_id") @db.Uuid
+  uploaderCoreUserId String    @map("uploader_core_user_id") @db.VarChar(64)
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  repairRequest RepairRequest @relation(fields: [repairRequestId], references: [id], onDelete: Cascade)
+  uploader      Profile       @relation(fields: [uploaderCoreUserId], references: [coreUserId])
+
+  @@map("repair_images")
+}
+
+model RequestActivity {
+  id              String         @id @default(uuid()) @db.Uuid
+  type            ActivityType
+  fromStatus      RequestStatus? @map("from_status")
+  toStatus        RequestStatus? @map("to_status")
+  message         String?        @db.VarChar(2000)
+  repairRequestId String         @map("repair_request_id") @db.Uuid
+  actorCoreUserId String         @map("actor_core_user_id") @db.VarChar(64)
+  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  repairRequest RepairRequest @relation(fields: [repairRequestId], references: [id], onDelete: Cascade)
+  actor         Profile       @relation(fields: [actorCoreUserId], references: [coreUserId])
+
+  @@index([repairRequestId, createdAt])
+  @@map("request_activities")
+}
+
+model Notification {
+  id         String   @id @default(uuid()) @db.Uuid
+  title      String   @db.VarChar(200)
+  message    String   @db.VarChar(2000)
+  link       String?  @db.VarChar(300) // path ภายในระบบ เช่น /requests/<id>
+  isRead     Boolean  @default(false) @map("is_read")
+  coreUserId String   @map("core_user_id") @db.VarChar(64) // ผู้รับ
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  recipient Profile @relation(fields: [coreUserId], references: [coreUserId], onDelete: Cascade)
+
+  @@index([coreUserId, isRead])
+  @@map("notifications")
+}
+
+/// ผู้ใช้ที่เจอปัญหาเดียวกับใบแจ้งซ่อมนี้ ("ฉันก็เจอ") — ติดตามใบเดิมแทนการแจ้งซ้ำ และได้รับการแจ้งเตือนเหมือนผู้แจ้ง
+model RequestFollower {
+  id              String   @id @default(uuid()) @db.Uuid
+  repairRequestId String   @map("repair_request_id") @db.Uuid
+  coreUserId      String   @map("core_user_id") @db.VarChar(64)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  repairRequest RepairRequest @relation(fields: [repairRequestId], references: [id], onDelete: Cascade)
+  follower      Profile       @relation(fields: [coreUserId], references: [coreUserId], onDelete: Cascade)
+
+  @@unique([repairRequestId, coreUserId])
+  @@index([coreUserId])
+  @@map("request_followers")
+}
