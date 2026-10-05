@@ -11,3 +11,11 @@ generated/
 *.pem
 *.key
 !.env.example
+
+# รูปงานซ่อมที่ผู้ใช้อัปโหลด (UPLOAD_DIR)
+backend/uploads/
+uploads/
+
+# ไฟล์ที่ Next.js/TypeScript สร้างเอง
+next-env.d.ts
+*.tsbuildinfo
