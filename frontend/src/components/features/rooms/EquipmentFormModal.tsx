@@ -55,7 +55,7 @@ function validate(draft: Draft, bulk: boolean): Partial<Record<Field, string>> {
 
 /**
  * เพิ่มอุปกรณ์ในห้อง (ทีละชิ้นหรือหลายชิ้นพร้อมกัน เช่น PC 30 เครื่อง) / แก้ไขอุปกรณ์ — ผู้ดูแลระบบ
- * เพิ่มหลายชิ้น: ป้ายเป็นคำนำหน้า ระบบต่อเลขให้ · เลขครุภัณฑ์/ตำแหน่ง/รูปต่างกันรายชิ้น จึงเพิ่มทีหลังที่หน้าเครื่อง
+ * เพิ่มหลายชิ้น: ป้ายเป็นคำนำหน้า ระบบต่อเลขให้ · รูปเดียวใช้กับทุกชิ้น · เลขครุภัณฑ์/ตำแหน่งต่างกันรายชิ้น จึงเพิ่มทีหลังที่หน้าเครื่อง
  * เพิ่มทีละชิ้นหรือแก้ไข: ใส่รูปได้เลย (อัปโหลดหลังบันทึกข้อมูลสำเร็จ)
  */
 export function EquipmentFormModal({
@@ -154,6 +154,12 @@ export function EquipmentFormModal({
         return;
       }
       const label = draft.label.trim().toUpperCase();
+      // เพิ่มหลายชิ้นพร้อมรูป: จำ id ของเครื่องเดิมในห้องไว้ก่อน ชิ้นที่เพิ่งเพิ่มคือ id ที่ไม่อยู่ในชุดนี้
+      // (backend ต่อเลขข้ามป้ายที่มีอยู่แล้ว จึงเดาป้ายจากคำนำหน้าไม่ได้)
+      const before =
+        bulk && photo.kind === 'new'
+          ? new Set((await api<RoomDetail>(`/api/v1/rooms/${roomId}`)).data.equipment.map((item) => item.id))
+          : null;
       const { data: room } = await api<RoomDetail>(`/api/v1/rooms/${roomId}/equipment`, {
         method: 'POST',
         json: {
@@ -169,14 +175,32 @@ export function EquipmentFormModal({
               }),
         },
       });
-      // เพิ่มทีละชิ้น: หา id ของชิ้นที่เพิ่งเพิ่มจากป้าย แล้วอัปโหลดรูปต่อ
-      const created = bulk ? undefined : room.equipment.find((item) => item.label === label);
-      const photoError =
-        created && photo.kind === 'new'
-          ? await applyPhotoChange(`/api/v1/equipment/${created.id}/photo`, photo)
-          : null;
-      if (photoError) toast.error(`เพิ่ม ${label} แล้ว แต่${photoError} — เพิ่มรูปได้อีกครั้งที่หน้าเครื่อง`);
-      else toast.success(bulk ? `เพิ่มอุปกรณ์ ${count} ชิ้นแล้ว (${label}-…)` : `เพิ่มอุปกรณ์ ${label} แล้ว`);
+      if (bulk) {
+        // รูปเดียวใช้กับทุกชิ้นที่เพิ่งเพิ่ม — อัปโหลดทีละชิ้น (endpoint รูปเป็นรายเครื่อง) เปลี่ยนรายชิ้นได้ที่หน้าเครื่อง
+        const created = before ? room.equipment.filter((item) => !before.has(item.id)) : [];
+        let failed = 0;
+        for (const item of created) {
+          if (await applyPhotoChange(`/api/v1/equipment/${item.id}/photo`, photo)) failed += 1;
+        }
+        if (failed > 0)
+          toast.error(
+            `เพิ่มอุปกรณ์ ${count} ชิ้นแล้ว แต่ใส่รูปไม่สำเร็จ ${failed} ชิ้น — เพิ่มรูปได้อีกครั้งที่หน้าเครื่อง`,
+          );
+        else
+          toast.success(
+            `เพิ่มอุปกรณ์ ${count} ชิ้นแล้ว (${label}-…)${created.length > 0 ? ' พร้อมรูปทุกชิ้น' : ''}`,
+          );
+      } else {
+        // เพิ่มทีละชิ้น: หา id ของชิ้นที่เพิ่งเพิ่มจากป้าย แล้วอัปโหลดรูปต่อ
+        const created = room.equipment.find((item) => item.label === label);
+        const photoError =
+          created && photo.kind === 'new'
+            ? await applyPhotoChange(`/api/v1/equipment/${created.id}/photo`, photo)
+            : null;
+        if (photoError)
+          toast.error(`เพิ่ม ${label} แล้ว แต่${photoError} — เพิ่มรูปได้อีกครั้งที่หน้าเครื่อง`);
+        else toast.success(`เพิ่มอุปกรณ์ ${label} แล้ว`);
+      }
       setBusy(false);
       setPhoto(KEEP_PHOTO);
       setDraft({ ...initial, categoryId: draft.categoryId });
@@ -280,7 +304,8 @@ export function EquipmentFormModal({
           >
             <InfoIcon className="mt-0.5 h-5 w-5 shrink-0 text-primary-container" />
             จะเพิ่ม {count} ชิ้น ป้ายเช่น {preview.first} ถึง {preview.last} (ถ้าห้องมีเลขนั้นแล้ว
-            ระบบต่อเลขถัดไปให้) — เลขครุภัณฑ์ ตำแหน่ง และรูปของแต่ละชิ้นเพิ่มได้ภายหลังที่หน้าเครื่อง
+            ระบบต่อเลขถัดไปให้) — รูปที่เลือกด้านล่างใช้กับทุกชิ้น ·
+            เลขครุภัณฑ์และตำแหน่งของแต่ละชิ้นเพิ่มได้ภายหลังที่หน้าเครื่อง
           </p>
         ) : null}
         <FormField
@@ -340,18 +365,22 @@ export function EquipmentFormModal({
             </FormField>
           </div>
         )}
-        {bulk ? null : (
-          <PhotoField
-            label={editing ? 'รูปอุปกรณ์' : 'รูปอุปกรณ์ (ไม่บังคับ)'}
-            currentUrl={equipment?.photoUrl ?? null}
-            value={photo}
-            onChange={setPhoto}
-            alt={`รูป ${draft.label || 'อุปกรณ์'} ${draft.name}`.trim()}
-            fallback={<EquipmentPhotoFallback icon={selectedIcon} label={draft.label || undefined} />}
-            aspectClass="aspect-[4/3] max-w-sm"
-            disabled={busy}
-          />
-        )}
+        <PhotoField
+          label={
+            editing
+              ? 'รูปอุปกรณ์'
+              : bulk
+                ? `รูปอุปกรณ์ ใช้กับทั้ง ${count} ชิ้น (ไม่บังคับ)`
+                : 'รูปอุปกรณ์ (ไม่บังคับ)'
+          }
+          currentUrl={equipment?.photoUrl ?? null}
+          value={photo}
+          onChange={setPhoto}
+          alt={`รูป ${draft.label || 'อุปกรณ์'} ${draft.name}`.trim()}
+          fallback={<EquipmentPhotoFallback icon={selectedIcon} label={draft.label || undefined} />}
+          aspectClass="aspect-[4/3] max-w-sm"
+          disabled={busy}
+        />
         <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
           <button type="button" onClick={close} className={secondaryButtonClass} disabled={busy}>
             ยกเลิก

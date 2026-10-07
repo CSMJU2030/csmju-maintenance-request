@@ -6,9 +6,10 @@ import { api } from '@/lib/api';
 import type { Notification } from '@/lib/types';
 
 const POLL_MS = 60_000;
-const SEARCH = 'header input[type="search"]';
-const BELL = 'header button[aria-label^="การแจ้งเตือน"]';
-const USER = 'header button:not([aria-label])';
+// top bar ของ CsmjuAppShell เท่านั้น (#main > header) — หน้าอื่นมี <header> ของตัวเองที่มีปุ่ม
+const SEARCH = '#main > header input[type="search"]';
+const BELL = '#main > header button[aria-label^="การแจ้งเตือน"]';
+const USER = '#main > header button:not([aria-label])';
 
 /**
  * ต่อปุ่มบน top bar ของ `CsmjuAppShell` (template · ห้ามแก้) เข้ากับงานของระบบนี้ โดยไม่แตะไฟล์ของ template
