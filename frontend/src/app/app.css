@@ -42,6 +42,12 @@
   }
 }
 
+/* <main> ของ CsmjuAppShell เป็น flex item ที่ไม่มี min-width: 0 — ตารางกว้างจะดันทั้งหน้าให้กว้างเกินจอ
+   ให้ตารางเลื่อนในกรอบของตัวเอง (overflow-x-auto) แทน */
+#main {
+  min-width: 0;
+}
+
 /* กระดิ่งบน top bar ของ CsmjuAppShell — จุดแดงเมื่อมีรายการที่ยังไม่อ่าน (ข้อ 5.1 · ตั้งโดย ShellBridge) */
 #main > header button[data-unread] {
   position: relative;

@@ -20,6 +20,7 @@ import { OpenRequestList } from '@/components/features/rooms/OpenRequestList';
 import { RoomChips, RoomPhoto } from '@/components/features/rooms/room-visuals';
 import { AddEquipmentButton, RoomAdminTools } from '@/components/features/rooms/RoomAdminTools';
 import { ApiFailure } from '@/components/shared/ApiFailure';
+import { BulkSelectProvider, BulkToolbar } from '@/components/shared/BulkSelect';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { floorLabel } from '@/lib/format';
 import { can, P } from '@/lib/permissions';
@@ -150,7 +151,19 @@ export default async function RoomPage(props: PageProps<'/rooms/[id]'>) {
               <div className="max-w-xl">
                 <RoomStateBar summary={room.equipmentStates} />
               </div>
-              <EquipmentGrid equipment={equipment} />
+              {manage ? (
+                <BulkSelectProvider>
+                  <BulkToolbar
+                    allIds={equipment.map((item) => item.id)}
+                    noun="อุปกรณ์"
+                    endpoint="/api/v1/equipment"
+                    deleteConsequence="ลบได้เฉพาะเครื่องที่ยังไม่เคยแจ้งซ่อม เครื่องที่มีประวัติให้ปิดใช้งานแทน"
+                  />
+                  <EquipmentGrid equipment={equipment} selectable />
+                </BulkSelectProvider>
+              ) : (
+                <EquipmentGrid equipment={equipment} />
+              )}
             </>
           ) : (
             <EmptyState
