@@ -10,7 +10,6 @@ import {
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
-import { FilesInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -27,7 +26,8 @@ import { RequirePermissions } from '../auth/decorators/require-permissions.decor
 import { Permission } from '../auth/permissions';
 import { ApiEnvelope, ApiErrors, ApiPageEnvelope } from '../shared/swagger';
 import { UuidParam } from '../shared/uuid.pipe';
-import { MAX_IMAGE_BYTES, MAX_IMAGES_PER_UPLOAD } from '../repair-images/image-storage';
+import { MAX_IMAGES_PER_UPLOAD } from '../repair-images/image-storage';
+import { ImageFilesInterceptor } from '../repair-images/image-upload.interceptor';
 import {
   AssignRepairRequestDto,
   CancelRepairRequestDto,
@@ -46,11 +46,9 @@ import {
 } from './repair-requests.dto';
 import { RepairRequestsService } from './repair-requests.service';
 
-/** รับรูปเข้าหน่วยความจำก่อน แล้ว ImageStorage ตรวจ magic bytes ก่อนเขียนลงดิสก์ */
+/** รับรูปเข้าหน่วยความจำ (≤ 10 MB ต่อไฟล์) แล้ว ImageStorage ตรวจ magic bytes ก่อนบันทึกลงฐานข้อมูล */
 const photos = () =>
-  FilesInterceptor('photos', MAX_IMAGES_PER_UPLOAD, {
-    limits: { fileSize: MAX_IMAGE_BYTES, files: MAX_IMAGES_PER_UPLOAD, fields: 20, fieldSize: 16 * 1024 },
-  });
+  ImageFilesInterceptor('photos', MAX_IMAGES_PER_UPLOAD, { fields: 20, fieldSize: 16 * 1024 });
 
 /** schema ของ multipart: ช่องข้อมูลของ DTO + ช่อง photos (ไฟล์ภาพสูงสุด 5 ไฟล์) */
 const multipartBody = (dto: new () => unknown) =>

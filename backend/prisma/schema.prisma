@@ -65,7 +65,7 @@ model Profile {
   coreRole       String    @map("core_role") @db.VarChar(10)
   /// Layer 2: ผู้ดูแลระบบนี้แต่งตั้งบุคลากรเป็นช่าง (data-dictionary.md ข้อ 10 — Layer 2 Role เป็นของระบบย่อย)
   isTechnician   Boolean   @default(false) @map("is_technician")
-  /// รูปโปรไฟล์ที่ผู้ใช้อัปโหลดในระบบนี้ (Core Hub v1.0 ยังไม่มีรูปผู้ใช้) — ชื่อไฟล์ใน UPLOAD_DIR
+  /// รูปโปรไฟล์ที่ผู้ใช้อัปโหลดในระบบนี้ (Core Hub v1.0 ยังไม่มีรูปผู้ใช้) — stored_files.id (ชื่อคอลัมน์คงเดิม)
   avatarFilename String?   @map("avatar_filename") @db.VarChar(100)
   lastSeenAt     DateTime? @map("last_seen_at") @db.Timestamptz(3)
   createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
@@ -115,7 +115,7 @@ model Room {
   roomType     RoomType @default(LAB) @map("room_type")
   /// จำนวนที่นั่ง
   capacity     Int?
-  /// รูปห้อง — ชื่อไฟล์ใน UPLOAD_DIR
+  /// รูปห้อง — stored_files.id (ชื่อคอลัมน์คงเดิม)
   photoFilename String? @map("photo_filename") @db.VarChar(100)
   /// รหัสสั้นใน QR ของห้อง (/q/<qrCode>)
   qrCode       String   @unique @map("qr_code") @db.VarChar(16)
@@ -144,7 +144,7 @@ model Equipment {
   specs       String?  @db.VarChar(1000)
   /// ตำแหน่งในห้อง เช่น แถว 2 ที่ 3
   position    String?  @db.VarChar(50)
-  /// รูปเครื่อง — ชื่อไฟล์ใน UPLOAD_DIR
+  /// รูปเครื่อง — stored_files.id (ชื่อคอลัมน์คงเดิม)
   photoFilename String? @map("photo_filename") @db.VarChar(100)
   /// รหัสสั้นใน QR ของเครื่อง (/q/<qrCode>)
   qrCode      String   @unique @map("qr_code") @db.VarChar(16)
@@ -210,6 +210,7 @@ model RepairRequest {
 
 model RepairImage {
   id                 String    @id @default(uuid()) @db.Uuid
+  /// stored_files.id ของไฟล์รูป (ชื่อคอลัมน์คงเดิมจากสมัยเก็บไฟล์บนดิสก์)
   filename           String    @unique @db.VarChar(100)
   mimeType           String    @map("mime_type") @db.VarChar(50)
   size               Int
@@ -223,6 +224,20 @@ model RepairImage {
   uploader      Profile       @relation(fields: [uploaderCoreUserId], references: [coreUserId])
 
   @@map("repair_images")
+}
+
+/// ไฟล์ที่ผู้ใช้อัปโหลด (รูปงานซ่อม · รูปโปรไฟล์ · รูปห้อง/เครื่อง) — container อ่านอย่างเดียว จึงเก็บในฐานข้อมูล
+/// แยกจากตารางธุรกิจ ซึ่งอ้างถึงด้วย id เท่านั้น · query รายการห้ามโหลด content (deployment.md ข้อ 3.4/4.3)
+model StoredFile {
+  id                   String   @id @default(uuid()) @db.Uuid
+  mimeType             String   @map("mime_type") @db.VarChar(50)
+  sizeBytes            Int      @map("size_bytes")
+  sha256               String   @db.Char(64)
+  content              Bytes
+  uploadedByCoreUserId String?  @map("uploaded_by_core_user_id") @db.VarChar(64)
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@map("stored_files")
 }
 
 model RequestActivity {

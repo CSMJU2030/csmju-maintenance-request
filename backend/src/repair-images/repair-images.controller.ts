@@ -10,7 +10,7 @@ import { ApiErrors } from '../shared/swagger';
 import { UuidParam } from '../shared/uuid.pipe';
 import { PrismaService } from '../prisma/prisma.service';
 import { canRead } from '../repair-requests/workflow';
-import { ImageStorage } from './image-storage';
+import { ImageStorage, sendImage } from './image-storage';
 
 /**
  * ไฟล์รูปงานซ่อม — ส่งเป็น binary (ไม่ห่อ envelope เพราะเป็นไฟล์ ไม่ใช่ JSON)
@@ -45,12 +45,6 @@ export class RepairImagesController {
     const file = await this.storage.open(image.filename);
     if (!file) throw notFound('ไฟล์รูปนี้ไม่อยู่ในที่เก็บแล้ว');
 
-    // ส่งผ่าน @Res() เอง — ResponseInterceptor ของชั้นกลางห่อเฉพาะค่าที่ controller return
-    res.setHeader('Cache-Control', 'private, max-age=86400, immutable');
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('Content-Type', image.mimeType);
-    res.setHeader('Content-Length', String(file.size));
-    res.setHeader('Content-Disposition', 'inline');
-    file.stream.pipe(res);
+    sendImage(res, file);
   }
 }

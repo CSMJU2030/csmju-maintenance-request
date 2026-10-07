@@ -11,7 +11,6 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -28,7 +27,8 @@ import { CoreHubAccessToken } from '../auth/decorators/core-hub-access-token.dec
 import { RequirePermissions } from '../auth/decorators/require-permissions.decorator';
 import { Permission } from '../auth/permissions';
 import { displayNameFrom, PeopleDirectory } from '../directory/people-directory';
-import { MAX_IMAGE_BYTES, type UploadedImage } from '../repair-images/image-storage';
+import { sendImage, type UploadedImage } from '../repair-images/image-storage';
+import { ImageFileInterceptor } from '../repair-images/image-upload.interceptor';
 import { ApiEnvelope, ApiErrors, ApiPageEnvelope, DeletedDto } from '../shared/swagger';
 import { UuidParam } from '../shared/uuid.pipe';
 import { avatarUrlOf, toProfileView } from './profile.view';
@@ -80,7 +80,7 @@ export class ProfilesController {
 
   @Post('me/avatar')
   @RequirePermissions(Permission.PROFILE_UPDATE_OWN)
-  @UseInterceptors(FileInterceptor('avatar', { limits: { fileSize: MAX_IMAGE_BYTES, files: 1, fields: 0 } }))
+  @UseInterceptors(ImageFileInterceptor('avatar'))
   @ApiOperation({ summary: 'เปลี่ยนรูปโปรไฟล์ของตัวเอง (JPG · PNG · WebP ไม่เกิน 2 MB ในช่อง avatar)' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -145,12 +145,6 @@ export class ProfilesController {
   @ApiResponse({ status: 200, description: 'ไฟล์รูป', schema: { type: 'string', format: 'binary' } })
   @ApiErrors(400, 404)
   async avatar(@Param('id', UuidParam) id: string, @Res() res: Response) {
-    const file = await this.profiles.openAvatar(id);
-    // URL มี ?v= ที่เปลี่ยนตามรูป — cache ได้ยาวโดยไม่ค้างรูปเก่า
-    res.setHeader('Cache-Control', 'private, max-age=31536000, immutable');
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('Content-Type', file.type);
-    res.setHeader('Content-Length', String(file.size));
-    file.stream.pipe(res);
+    sendImage(res, await this.profiles.openAvatar(id));
   }
 }

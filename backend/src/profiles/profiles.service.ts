@@ -113,7 +113,7 @@ export class ProfilesService {
     if (!file) throw validationError(['avatar: กรุณาเลือกรูปโปรไฟล์']);
     if (file.size > MAX_AVATAR_BYTES) throw validationError(['avatar: รูปโปรไฟล์ต้องไม่เกิน 2 MB']);
     const current = await this.getByCoreUserId(coreUserId);
-    const [stored] = await this.storage.save([file]);
+    const [stored] = await this.storage.save([file], coreUserId);
     const { count } = await this.prisma.profile.updateMany({
       where: { coreUserId, avatarFilename: current.avatarFilename },
       data: { avatarFilename: stored.filename },
@@ -138,7 +138,7 @@ export class ProfilesService {
     if (count === 0) throw conflict('มีการเปลี่ยนรูปโปรไฟล์พร้อมกันอีกหน้าหนึ่ง กรุณาลองอีกครั้ง');
     await this.storage.remove([current.avatarFilename]);
     this.forget(coreUserId);
-    return { id: current.avatarFilename.split('.')[0], deleted: true as const };
+    return { id: current.avatarFilename, deleted: true as const };
   }
 
   /** เปิดไฟล์รูปโปรไฟล์ของใครก็ได้ในระบบนี้ (ต้องเข้าสู่ระบบแล้ว) */
@@ -147,9 +147,7 @@ export class ProfilesService {
     if (!profile?.avatarFilename) throw notFound('ผู้ใช้นี้ยังไม่มีรูปโปรไฟล์');
     const file = await this.storage.open(profile.avatarFilename);
     if (!file) throw notFound('ไฟล์รูปโปรไฟล์ไม่อยู่ในที่เก็บแล้ว');
-    const extension = profile.avatarFilename.split('.').pop();
-    const type = extension === 'png' ? 'image/png' : extension === 'webp' ? 'image/webp' : 'image/jpeg';
-    return { ...file, type };
+    return file;
   }
 
   /** ผู้ที่เคยเข้าระบบนี้ตาม role (ใช้เลือกช่างตอนมอบหมายงาน) */

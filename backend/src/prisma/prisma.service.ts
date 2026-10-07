@@ -9,7 +9,13 @@ import { PrismaClient } from '../../generated/prisma/client';
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleDestroy {
   constructor() {
-    super({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) });
+    // server ใช้ PostgreSQL ตัวกลางร่วมกันทุกระบบ — จำกัด connection ต่อระบบ (deployment.md ข้อ 4.1)
+    super({
+      adapter: new PrismaPg({
+        connectionString: process.env.DATABASE_URL,
+        max: Number(process.env.DATABASE_POOL_MAX) || 5,
+      }),
+    });
   }
 
   async onModuleDestroy() {
