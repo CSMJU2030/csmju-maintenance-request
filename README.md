@@ -50,8 +50,8 @@ standards/  มาตรฐานกลาง (ห้ามแก้ใน repo 
 | ช่อง | ค่า |
 |---|---|
 | ชื่อระบบ | `csmju-maintenance-request` |
-| Callback URL | `http://localhost:3221/auth/callback` (พอร์ต frontend) |
-| Base URL | เว้นว่าง |
+| Callback URL | `https://csmju-maintenance-request.jowave.com/auth/callback` |
+| Base URL | `https://csmju-maintenance-request.jowave.com` |
 | บทบาท | student → `USER` · staff → `USER` · lecturer → `USER` · admin → `ADMIN` |
 
 ```bash
@@ -114,7 +114,8 @@ docker compose down                 # หยุด (ข้อมูลยัง�
 - `BACKEND_URL` และ `CORE_HUB_WEB_URL` ถูกฝังตอน build ของ web (Next.js คำนวณ rewrites ตอน build) — เปลี่ยนค่าแล้วต้อง build ใหม่
 - env ของ api บน server มาจาก `backend/.env.example` (DevOps ตั้งตามไฟล์นี้) · ผู้ดูแลระบบแจ้งซ่อมตั้งด้วย `ADMIN_ACCOUNTS`
 - frontend เป็นประตูเดียวของระบบ (ส่งต่อ `/api/*` และ `/auth/login` `/auth/callback` `/auth/logout` ให้ backend)
-  ขึ้น host จริงแล้วให้ admin ระบบกลางเปลี่ยน Callback URL เป็น `https://<โดเมน>/auth/callback` และตั้ง `NODE_ENV=production`
+  ชื่อเว็บบน server คือ `https://csmju-maintenance-request.jowave.com` (Callback `https://csmju-maintenance-request.jowave.com/auth/callback`) · `NODE_ENV=production`
+- ผู้ดูแลระบบแจ้งซ่อม = บัญชีเจ้าของระบบ `csmju-maintenance-request.admin@csmju2030.ac.th` (core role `staff`) ผ่าน `ADMIN_ACCOUNTS` · staff คนอื่นยังเป็น `USER`
 
 ## ตัวแปร environment
 
