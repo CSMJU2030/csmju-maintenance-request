@@ -23,6 +23,7 @@ import {
   tonalButtonClass,
 } from '@/components/ui';
 import { CategoryGlyph } from '@/components/features/rooms/equipment-visuals';
+import { BulkSelectProvider, BulkToolbar, SelectCheckbox } from '@/components/shared/BulkSelect';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { describedBy, FormField } from '@/components/shared/FormField';
 import { LoadingButton } from '@/components/shared/LoadingButton';
@@ -166,7 +167,7 @@ export function CatalogManager({ items }: { items: Category[] }) {
   );
 
   return (
-    <>
+    <BulkSelectProvider>
       <div className="flex flex-col gap-3 border-b border-outline-variant/40 px-4 py-5 md:flex-row md:items-center md:justify-between md:px-6">
         <p className="text-body-md text-on-surface-variant">
           ทั้งหมด {formatNumber(items.length)} ประเภท · ที่ปิดการใช้งานจะไม่แสดงตอนเพิ่มเครื่องและแจ้งซ่อม
@@ -176,6 +177,16 @@ export function CatalogManager({ items }: { items: Category[] }) {
           เพิ่มประเภทอุปกรณ์
         </button>
       </div>
+      {items.length > 0 ? (
+        <div className="border-b border-outline-variant/40 px-4 py-3 md:px-6">
+          <BulkToolbar
+            allIds={sorted.map((item) => item.id)}
+            noun="ประเภท"
+            endpoint="/api/v1/categories"
+            deleteConsequence="ลบได้เฉพาะประเภทที่ยังไม่มีเครื่องหรือใบแจ้งซ่อมอ้างถึง ประเภทอื่นให้ปิดการใช้งานแทน"
+          />
+        </div>
+      ) : null}
       {items.length === 0 ? (
         <EmptyState
           title="ยังไม่มีประเภทอุปกรณ์"
@@ -194,6 +205,7 @@ export function CatalogManager({ items }: { items: Category[] }) {
             {sorted.map((item) => (
               <li key={item.id} className={`space-y-3 px-4 py-4 ${item.isActive ? '' : 'bg-surface/60'}`}>
                 <div className="flex items-start gap-3">
+                  <SelectCheckbox id={item.id} label={item.name} />
                   <IconBox icon={item.icon} muted={!item.isActive} />
                   <div className="min-w-0 flex-1">
                     <p className="text-body-md font-semibold text-on-surface">{item.name}</p>
@@ -239,6 +251,7 @@ export function CatalogManager({ items }: { items: Category[] }) {
                   <tr key={item.id} className={`${tbodyRowClass} ${item.isActive ? '' : 'bg-surface/60'}`}>
                     <td className={tdClass}>
                       <div className="flex items-center gap-3">
+                        <SelectCheckbox id={item.id} label={item.name} />
                         <IconBox icon={item.icon} muted={!item.isActive} />
                         <div className="min-w-0">
                           <p className="font-medium text-on-surface">{item.name}</p>
@@ -297,7 +310,7 @@ export function CatalogManager({ items }: { items: Category[] }) {
         onConfirm={() => void remove()}
         onClose={() => !busy && setDeleting(null)}
       />
-    </>
+    </BulkSelectProvider>
   );
 }
 

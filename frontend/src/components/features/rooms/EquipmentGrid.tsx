@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { GroupIcon } from '@/components/ui';
+import { GroupSelectButton, SelectableItem } from '@/components/shared/BulkSelect';
+import { CollapsibleGroup } from '@/components/shared/CollapsibleGroup';
 import { EQUIPMENT_STATE_LABEL } from '@/lib/labels';
 import type { Equipment } from '@/lib/types';
 import { CategoryGlyph, EquipmentPhotoFallback, EquipmentStateBadge, STATE_STYLE } from './equipment-visuals';
@@ -29,36 +31,53 @@ export const equipmentGridClass =
   'grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6';
 
 /**
- * อุปกรณ์ในห้อง จัดเป็นหัวข้อตามประเภท — การ์ดละชิ้น กดเพื่อไปหน้าเครื่อง (ดูสถานะ / แจ้งซ่อมเครื่องนั้น)
+ * อุปกรณ์ในห้อง จัดเป็นหัวข้อตามประเภท (พับ/กางได้) — การ์ดละชิ้น กดเพื่อไปหน้าเครื่อง (ดูสถานะ / แจ้งซ่อมเครื่องนั้น)
  * แต่ละการ์ดบอกสถานะด้วย สี + ไอคอน + ข้อความ และ aria-label อ่านครบในประโยคเดียว
+ * selectable = ผู้ดูแลระบบเลือกหลายชิ้นได้ (ต้องอยู่ใน BulkSelectProvider)
  */
-export function EquipmentGrid({ equipment }: { equipment: EquipmentCardItem[] }) {
+export function EquipmentGrid({
+  equipment,
+  selectable = false,
+}: {
+  equipment: EquipmentCardItem[];
+  selectable?: boolean;
+}) {
   const groups = groupByCategory(equipment);
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {groups.map(({ category, items }) => {
         const issues = items.filter((item) => item.state !== 'OK').length;
         return (
-          <section key={category.id} aria-labelledby={`cat-${category.id}`} className="space-y-3">
-            <h3
+          <section key={category.id} aria-labelledby={`cat-${category.id}`}>
+            <CollapsibleGroup
               id={`cat-${category.id}`}
-              className="flex flex-wrap items-center gap-2 text-label-md text-on-surface"
+              icon={
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-surface-container text-primary-container">
+                  <CategoryGlyph icon={category.icon} className="h-5 w-5" />
+                </span>
+              }
+              title={category.name}
+              meta={`${items.length} ชิ้น${issues > 0 ? ` · มีปัญหา ${issues}` : ''}`}
+              actions={
+                selectable ? (
+                  <GroupSelectButton ids={items.map((item) => item.id)} name={category.name} />
+                ) : null
+              }
             >
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-surface-container text-primary-container">
-                <CategoryGlyph icon={category.icon} className="h-5 w-5" />
-              </span>
-              {category.name}
-              <span className="font-normal text-on-surface-variant">
-                {items.length} ชิ้น{issues > 0 ? ` · มีปัญหา ${issues}` : ''}
-              </span>
-            </h3>
-            <ul className={equipmentGridClass}>
-              {items.map((item) => (
-                <li key={item.id}>
-                  <EquipmentCard item={item} />
-                </li>
-              ))}
-            </ul>
+              <ul className={equipmentGridClass}>
+                {items.map((item) => (
+                  <li key={item.id}>
+                    {selectable ? (
+                      <SelectableItem id={item.id} label={`${item.label} ${item.name}`}>
+                        <EquipmentCard item={item} />
+                      </SelectableItem>
+                    ) : (
+                      <EquipmentCard item={item} />
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </CollapsibleGroup>
           </section>
         );
       })}

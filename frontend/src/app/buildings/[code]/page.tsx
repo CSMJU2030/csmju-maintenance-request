@@ -2,20 +2,12 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
-import {
-  ArrowBackIcon,
-  cardClass,
-  linkClass,
-  PageHeader,
-  sectionTitleClass,
-  StatusBadge,
-} from '@/components/ui';
-import { RoomCard } from '@/components/features/rooms/RoomCard';
+import { ArrowBackIcon, cardClass, linkClass, PageHeader, StatusBadge } from '@/components/ui';
+import { RoomSections } from '@/components/features/rooms/RoomSections';
 import { AddRoomButton } from '@/components/features/rooms/RoomAdminTools';
 import { ApiFailure } from '@/components/shared/ApiFailure';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { formatNumber } from '@/lib/format';
-import { ROOM_TYPE_LABEL } from '@/lib/labels';
 import { groupRoomsByType } from '@/components/features/rooms/group-rooms';
 import { can, P } from '@/lib/permissions';
 import { serverApi } from '@/lib/server-api';
@@ -97,25 +89,7 @@ export default async function BuildingPage(props: PageProps<'/buildings/[code]'>
           />
         </div>
       ) : (
-        <div className="space-y-8">
-          {sections.map(({ type, rooms: list }) => (
-            <section key={type} aria-labelledby={`type-${type}`} className="space-y-4">
-              <h2 id={`type-${type}`} className={sectionTitleClass}>
-                {ROOM_TYPE_LABEL[type]}{' '}
-                <span className="text-body-md font-normal text-on-surface-variant">
-                  {formatNumber(list.length)} ห้อง
-                </span>
-              </h2>
-              <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {list.map((room) => (
-                  <li key={room.id}>
-                    <RoomCard room={room} />
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))}
-        </div>
+        <RoomSections sections={sections} manage={manage} />
       )}
     </>
   );
