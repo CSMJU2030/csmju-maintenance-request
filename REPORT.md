@@ -131,7 +131,7 @@ pnpm --filter frontend test    21 passed
 - **GH-04** ผ่านเมื่อ commit submodule ที่ชี้ v1.7.0
 - **ต้องให้ DevOps แก้** `.github/workflows/ci.yml` (ทีมแก้ไม่ได้): ยังปัก `@v1.0.0` และ `subsystem_name: csmju-repair` —
   ต้องย้ายเป็น `@v1.5.2` ขึ้นไป (`standards-versioning.md` ข้อ 4) และใช้ชื่อ `csmju-maintenance-request`
-- **ลงทะเบียน** `csmju-maintenance-request` ในหลังบ้านของ Core Hub (PL · callback `http://localhost:3221/auth/callback`) แล้วรัน conformance
+- **ลงทะเบียน** `csmju-maintenance-request` ในหลังบ้านของ Core Hub (PL · callback `https://csmju-maintenance-request.jowave.com/auth/callback` · Base URL `https://csmju-maintenance-request.jowave.com`) แล้วรัน conformance
 - **probe create** ใช้ `allowed_role: admin` (หมวดหมู่ = งานของผู้ดูแลระบบ) แต่ Core Hub จริงไม่มีบัญชี admin ให้ทีม —
   เคสนี้รันได้กับ Core Hub ในเครื่อง/ตัวจำลองเท่านั้น จนกว่าจะได้สิทธิ์พิเศษรายบุคคล
 - ข้อความแจ้งเตือน/ประวัติ **เก่า** ที่เคยเขียนชื่อคนไว้ในข้อความยังอยู่ในฐานข้อมูล (migration ไม่แก้ข้อความอิสระ)

@@ -66,7 +66,7 @@ services:
       SUBSYSTEM_ID: ${SUBSYSTEM_ID:-csmju-maintenance-request}
       SUBSYSTEM_NAME: ${SUBSYSTEM_NAME:-ระบบแจ้งซ่อม}
       # emails of Core Hub staff/lecturer accounts that administer this system (comma separated)
-      ADMIN_ACCOUNTS: ${ADMIN_ACCOUNTS:-}
+      ADMIN_ACCOUNTS: ${ADMIN_ACCOUNTS:-csmju-maintenance-request.admin@csmju2030.ac.th}
       TZ: Asia/Bangkok
     tmpfs:
       - /tmp:size=32m
@@ -96,7 +96,7 @@ services:
       SUBSYSTEM_ID: ${SUBSYSTEM_ID:-csmju-maintenance-request}
       TZ: Asia/Bangkok
     ports:
-      # the callback registered in Core Hub is http://localhost:3221/auth/callback
+      # local only - on the server Apache serves https://csmju-maintenance-request.jowave.com
       - '127.0.0.1:3221:3000'
 
 volumes:

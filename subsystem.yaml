@@ -7,12 +7,12 @@ name: csmju-maintenance-request     # ตรงกับทะเบียนใ
 display_name: "ระบบแจ้งซ่อม"
 conformance_level: L3
 
-# frontend (Next.js :3221) เป็นประตูเดียวของระบบ: proxy /api/* และ /auth/login /auth/callback /auth/logout
-# ไป backend (NestJS :4221) — พอร์ตตามที่ผู้ดูแล dev server กำหนด (connect-core-hub.md ข้อ 1)
-base_url: http://localhost:3221
+# frontend (Next.js) เป็นประตูเดียวของระบบ: proxy /api/* และ /auth/login /auth/callback /auth/logout ไป backend (NestJS)
+# ชื่อเว็บบน server = <ชื่อในทะเบียน>.jowave.com (deployment.md ข้อ 2) · ในเครื่องเปิดที่ http://localhost:3221
+base_url: https://csmju-maintenance-request.jowave.com
 core_hub_url: https://csmju2030.jowave.com
 core_hub_web_url: https://csmju2030.jowave.com
-callback_path: /auth/callback       # Callback URL ที่ลงทะเบียน = http://localhost:3221/auth/callback
+callback_path: /auth/callback       # Callback URL ที่ลงทะเบียน = https://csmju-maintenance-request.jowave.com/auth/callback
 
 default_role_mapping:               # ต้องตรงกับ backend/src/auth/role-mapping.ts และทะเบียนของ Core Hub
   student: USER
