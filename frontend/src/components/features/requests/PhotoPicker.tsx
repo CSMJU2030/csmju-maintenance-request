@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useEffect, useId, useRef, useState } from 'react';
-import { CameraIcon, CloseIcon, secondaryButtonClass } from '@/csmju';
+import { CameraIcon, CloseIcon, secondaryButtonClass } from '@/components/ui';
 import { prepareImage } from '@/lib/image-resize';
 
 export type PickedPhoto = { id: string; file: File; url: string };

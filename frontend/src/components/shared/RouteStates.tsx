@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowBackIcon, secondaryButtonClass } from '@/csmju';
+import { ArrowBackIcon, secondaryButtonClass } from '@/components/ui';
 import { EmptyState } from './EmptyState';
 import { PageSkeleton } from './Skeleton';
 

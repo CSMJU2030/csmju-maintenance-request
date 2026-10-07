@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, type ReactNode } from 'react';
-import { CameraIcon, Modal, primaryButtonClass, secondaryButtonClass } from '@/csmju';
+import { CameraIcon, Modal, primaryButtonClass, secondaryButtonClass } from '@/components/ui';
 import { LoadingButton } from '@/components/shared/LoadingButton';
 import { useToast } from '@/components/shared/Toast';
 import { useUnsavedForm } from '@/lib/sso';

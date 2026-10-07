@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useId, useState, useTransition } from 'react';
-import { inputClass, SearchIcon, secondaryButtonClass } from '@/csmju';
+import { inputClass, SearchIcon, secondaryButtonClass } from '@/components/ui';
 import { PRIORITIES, PRIORITY_LABEL, STATUSES, STATUS_LABEL } from '@/lib/labels';
 
 export type FilterOption = { value: string; label: string };

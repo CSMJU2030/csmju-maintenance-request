@@ -43,6 +43,17 @@ probes:
     valid_body:
       name: Conformance Probe
 
+# หน้าเว็บใช้ template csmju-subsystem-web (ui-design-system.md ข้อ 17.0) · ส่วนที่ template ยังไม่มีทำเป็น local component
+ui:
+  local_components:
+    - src/components/ui/Modal.tsx               # Modal ที่เลือกขนาดได้ (md/lg/xl) และปิดการกดพื้นหลังได้ — ฟอร์มอุปกรณ์/ห้อง
+    - src/components/ui/ConfirmDeleteModal.tsx  # ยืนยันการลบพร้อมสถานะกำลังลบและข้อความ error
+    - src/components/ui/Tabs.tsx                # tab แบบลิงก์ (สถานะอยู่ใน URL)
+    - src/components/ui/PageHeader.tsx          # PageHeader ของ template + ป้ายเหนือชื่อและปุ่ม action
+    - src/components/ui/Avatar.tsx              # รูปโปรไฟล์/อักษรย่อ (ข้อ 14)
+    - src/components/ui/icons.tsx               # ไอคอนสไตล์เดียวกับชุดกลาง (ข้อ 14) ที่ template ยังไม่มี
+    - src/components/ui/classes.ts              # class ของ template + focus ring/disabled/touch target 44px (ข้อ 6.1, 12) และ tonal/ตาราง
+
 owners:
   pl: "@csmju2030/pl-repair"
   aie: "@csmju2030/aie-repair"

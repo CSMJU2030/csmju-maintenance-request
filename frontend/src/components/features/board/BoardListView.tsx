@@ -2,7 +2,13 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { ChevronDownIcon, LocationIcon, secondaryButtonClass, tonalButtonClass, WarningIcon } from '@/csmju';
+import {
+  ChevronDownIcon,
+  LocationIcon,
+  secondaryButtonClass,
+  tonalButtonClass,
+  WarningIcon,
+} from '@/components/ui';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { PriorityTag } from '@/components/features/requests/badges';
 import { formatNumber } from '@/lib/format';

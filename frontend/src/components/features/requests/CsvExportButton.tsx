@@ -2,7 +2,7 @@
 
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
-import { DownloadIcon, secondaryButtonClass } from '@/csmju';
+import { DownloadIcon, secondaryButtonClass } from '@/components/ui';
 import { LoadingButton } from '@/components/shared/LoadingButton';
 import { useToast } from '@/components/shared/Toast';
 import { api } from '@/lib/api';

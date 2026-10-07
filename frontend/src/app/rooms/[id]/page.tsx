@@ -13,7 +13,7 @@ import {
   primaryButtonClass,
   secondaryButtonClass,
   StatusBadge,
-} from '@/csmju';
+} from '@/components/ui';
 import { EquipmentGrid } from '@/components/features/rooms/EquipmentGrid';
 import { RoomStateBar, StateLegend } from '@/components/features/rooms/equipment-visuals';
 import { OpenRequestList } from '@/components/features/rooms/OpenRequestList';
@@ -79,7 +79,7 @@ export default async function RoomPage(props: PageProps<'/rooms/[id]'>) {
             <p className="flex flex-wrap items-center gap-2">
               <span className="text-label-md text-primary-container tabular-nums">{room.code}</span>
               <span className="text-label-md text-on-surface-variant">{place}</span>
-              {room.isActive ? null : <StatusBadge tone="neutral">ปิดใช้งาน</StatusBadge>}
+              {room.isActive ? null : <StatusBadge tone="neutral" label="ปิดใช้งาน" />}
             </p>
             <h1 className="font-display text-headline-md font-bold text-on-surface md:text-headline-lg">
               {room.name}

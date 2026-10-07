@@ -2,8 +2,8 @@
 
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
-import { ChevronRightIcon, iconRoundButtonClass, SearchIcon } from '@/csmju';
-import { StatusBadge } from '@/csmju';
+import { ChevronRightIcon, SearchIcon } from '@/components/ui';
+import { StatusBadge } from '@/components/ui';
 import { api, toQuery } from '@/lib/api';
 import { STATUS_LABEL, STATUS_TONE } from '@/lib/labels';
 import type { RepairRequestSummary } from '@/lib/types';
@@ -11,7 +11,7 @@ import type { RepairRequestSummary } from '@/lib/types';
 type Command = { id: string; label: string; hint?: string; href: string };
 
 /**
- * ค้นหาด่วน (Ctrl+K / ⌘K) — ไปหน้าต่าง ๆ หรือเปิดใบแจ้งซ่อมจากเลขที่/สิ่งที่ชำรุด/สถานที่
+ * ค้นหาด่วน (Ctrl+K / ⌘K หรือช่องค้นหาบน top bar ของ CsmjuAppShell ผ่าน ShellBridge) — ไปหน้าต่าง ๆ หรือเปิดใบแจ้งซ่อมจากเลขที่/สิ่งที่ชำรุด/สถานที่
  * combobox + listbox ตาม WAI-ARIA · ใช้คีย์บอร์ดได้ครบ (↑ ↓ Enter Esc)
  */
 export function CommandPalette({ canSeeAll, isAdmin }: { canSeeAll: boolean; isAdmin: boolean }) {
@@ -24,7 +24,6 @@ export function CommandPalette({ canSeeAll, isAdmin }: { canSeeAll: boolean; isA
   const [loading, setLoading] = useState(false);
   const [active, setActive] = useState(0);
   const input = useRef<HTMLInputElement>(null);
-  const trigger = useRef<HTMLButtonElement>(null);
 
   const pages = useMemo<Command[]>(() => {
     // ผู้ดูแลระบบแจ้งซ่อมเองไม่ได้ · ช่าง/ผู้ดูแลดูความเคลื่อนไหวในแผงข้างบอร์ดงานซ่อมแทนหน้าการแจ้งเตือน
@@ -100,7 +99,6 @@ export function CommandPalette({ canSeeAll, isAdmin }: { canSeeAll: boolean; isA
     setQuery('');
     setResults([]);
     setLoading(false);
-    trigger.current?.focus();
   }, []);
 
   useEffect(() => {
@@ -169,27 +167,6 @@ export function CommandPalette({ canSeeAll, isAdmin }: { canSeeAll: boolean; isA
 
   return (
     <>
-      <button
-        ref={trigger}
-        type="button"
-        onClick={() => setOpen(true)}
-        className="hidden h-11 w-full max-w-md items-center gap-3 rounded-full bg-surface px-4 text-left text-body-md text-outline transition-colors hover:bg-surface-container-low focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-container md:flex"
-      >
-        <SearchIcon className="h-5 w-5" />
-        <span className="flex-1">ค้นหาใบแจ้งซ่อมหรือเมนู…</span>
-        <kbd className="rounded border border-outline-variant px-1.5 text-caption text-on-surface-variant">
-          Ctrl K
-        </kbd>
-      </button>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-label="ค้นหา"
-        className={`${iconRoundButtonClass} md:hidden`}
-      >
-        <SearchIcon className="h-6 w-6" />
-      </button>
-
       {open ? (
         <div className="fixed inset-0 z-40 flex items-start justify-center p-4 pt-[12vh]">
           <button
@@ -269,9 +246,10 @@ export function CommandPalette({ canSeeAll, isAdmin }: { canSeeAll: boolean; isA
                           {option.request.building.name} · {option.request.location}
                         </span>
                       </span>
-                      <StatusBadge tone={STATUS_TONE[option.request.status]}>
-                        {STATUS_LABEL[option.request.status]}
-                      </StatusBadge>
+                      <StatusBadge
+                        tone={STATUS_TONE[option.request.status]}
+                        label={STATUS_LABEL[option.request.status]}
+                      />
                     </>
                   ) : 'command' in option && option.command ? (
                     <>

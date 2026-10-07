@@ -21,7 +21,7 @@ import {
   StatusBadge,
   WarningIcon,
   type IconProps,
-} from '@/csmju';
+} from '@/components/ui';
 import { RequestList } from '@/components/features/requests/RequestList';
 import { RoomStateBar } from '@/components/features/rooms/equipment-visuals';
 import { groupRoomsByType } from '@/components/features/rooms/group-rooms';
@@ -142,10 +142,12 @@ export default async function HomePage() {
           myOpen: total(myOpen),
         })}
         eyebrow={
-          <StatusBadge tone="info">
-            {CORE_ROLE_LABEL[user.coreRole] ?? user.coreRole}
-            {user.subsystemRole !== 'USER' ? ` · ${SUBSYSTEM_ROLE_LABEL[user.subsystemRole]}` : ''}
-          </StatusBadge>
+          <StatusBadge
+            tone="info"
+            label={`${CORE_ROLE_LABEL[user.coreRole] ?? user.coreRole}${
+              user.subsystemRole !== 'USER' ? ` · ${SUBSYSTEM_ROLE_LABEL[user.subsystemRole]}` : ''
+            }`}
+          />
         }
       />
 

@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
-import { ErrorIcon, primaryButtonClass } from '@/csmju';
+import { ErrorIcon, primaryButtonClass } from '@/components/ui';
 
 /**
  * ErrorState เต็มพื้นที่ + ปุ่ม "ลองอีกครั้ง" + รหัสอ้างอิง (ข้อ 9.3 — INTERNAL_ERROR / เชื่อมต่อไม่ได้)

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { GroupIcon, secondaryButtonClass } from '@/csmju';
+import { GroupIcon, secondaryButtonClass } from '@/components/ui';
 import { RequestStatusBadge } from '@/components/features/requests/badges';
 import { formatRelative } from '@/lib/format';
 import type { RoomDetail } from '@/lib/types';

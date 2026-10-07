@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
-import { ArrowBackIcon, CsmjuLogo, secondaryButtonClass } from '@/csmju';
+import { ArrowBackIcon, CsmjuLogo, secondaryButtonClass } from '@/components/ui';
 import { OriginQrCode } from '@/components/features/OriginQrCode';
 import { PrintButton } from '@/components/features/PrintButton';
 import { ApiFailure } from '@/components/shared/ApiFailure';

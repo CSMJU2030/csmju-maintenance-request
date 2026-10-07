@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { CsmjuLogo, primaryButtonClass } from '@/csmju';
+import { CsmjuLogo, primaryButtonClass } from '@/components/ui';
 import { DISPLAY_NAME, loginHref } from '@/lib/config';
 import { currentPath, startReSso } from '@/lib/sso';
 

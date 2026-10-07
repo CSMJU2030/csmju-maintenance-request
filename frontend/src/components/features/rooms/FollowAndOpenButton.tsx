@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { GroupIcon, tonalButtonClass } from '@/csmju';
+import { GroupIcon, tonalButtonClass } from '@/components/ui';
 import { LoadingButton } from '@/components/shared/LoadingButton';
 import { useToast } from '@/components/shared/Toast';
 import { api, ApiRequestError } from '@/lib/api';

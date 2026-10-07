@@ -1,4 +1,4 @@
-import { Avatar, CheckCircleIcon, GroupIcon, ScheduleIcon, WarningIcon } from '@/csmju';
+import { Avatar, CheckCircleIcon, GroupIcon, ScheduleIcon, WarningIcon } from '@/components/ui';
 import { formatDuration, formatNumber } from '@/lib/format';
 import { SLA_LABEL } from '@/lib/labels';
 import type { RepairRequestSummary } from '@/lib/types';

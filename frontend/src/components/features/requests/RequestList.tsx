@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronRightIcon, GroupIcon, ImageIcon, TONE_DOT_CLASS } from '@/csmju';
+import { ChevronRightIcon, GroupIcon, ImageIcon, TONE_DOT_CLASS } from '@/components/ui';
 import { formatRelative, placeText } from '@/lib/format';
 import { STATUS_TONE } from '@/lib/labels';
 import type { RepairRequestSummary } from '@/lib/types';

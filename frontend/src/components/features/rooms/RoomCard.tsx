@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { CheckCircleIcon, StatusBadge, WarningIcon } from '@/csmju';
+import { CheckCircleIcon, StatusBadge, WarningIcon } from '@/components/ui';
 import { formatNumber } from '@/lib/format';
 import type { Room } from '@/lib/types';
 import { summaryText } from './equipment-visuals';
@@ -33,7 +33,7 @@ export function RoomCard({ room }: { room: Room }) {
         <RoomPhoto photoUrl={room.photoUrl} code={room.code} name={room.name} roomType={room.roomType} />
         {room.isActive ? null : (
           <span className="absolute left-2 top-2">
-            <StatusBadge tone="neutral">ปิดใช้งาน</StatusBadge>
+            <StatusBadge tone="neutral" label="ปิดใช้งาน" />
           </span>
         )}
       </div>

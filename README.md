@@ -35,9 +35,10 @@ backend/    NestJS 11 + Prisma 7 (PostgreSQL ของระบบนี้เ�
   src/buildings (อ่านจาก Core Hub), src/categories, src/repair-images, src/health
   prisma/             schema, migrations, seed.ts (ประเภทอุปกรณ์ 10 ประเภท + ห้องของสาขา 8 ห้อง)
   openapi.json        สร้างจากโค้ด (pnpm --filter backend generate:openapi)
-frontend/   Next.js 16 App Router + Tailwind (token ตาม ui-design-system.md)
+frontend/   Next.js 16 App Router + Tailwind v4 (template csmju-subsystem-web ของ standards)
   src/app             หน้า: / · buildings · rooms/[id] (+ qr) · equipment/[id] · requests · queue · board · dashboard · profile · q/[code] · admin/*
-  src/csmju           ตัวแทนชั่วคราวของ template csmju-subsystem-web (AppShell, Modal, …) — ดู README ในโฟลเดอร์
+  src/csmju           ของกลางจาก standards/templates/csmju-subsystem-web (AppShell, โลโก้, ปุ่ม, ไอคอน) — ห้ามแก้
+  src/components/ui   local component ที่ template ยังไม่มี (import ทุกอย่างผ่าน @/components/ui)
   src/lib             API client (คุกกี้ HttpOnly ผ่าน origin เดียวกัน) · silent re-SSO · ชนิดข้อมูลจาก openapi.json
 standards/  มาตรฐานกลาง (ห้ามแก้ใน repo นี้)
 ```

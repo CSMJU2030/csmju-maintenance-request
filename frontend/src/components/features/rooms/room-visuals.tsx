@@ -7,7 +7,7 @@ import {
   PersonIcon,
   ProjectorIcon,
   type IconProps,
-} from '@/csmju';
+} from '@/components/ui';
 import { floorLabel, formatNumber } from '@/lib/format';
 import { ROOM_TYPE_SHORT, ROOM_TYPE_TONE } from '@/lib/labels';
 import type { RoomType } from '@/lib/types';

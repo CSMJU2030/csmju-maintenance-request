@@ -12,7 +12,7 @@ import {
   PrintIcon,
   secondaryButtonClass,
   StarIcon,
-} from '@/csmju';
+} from '@/components/ui';
 import { CommentBox } from '@/components/features/requests/CommentBox';
 import { FollowButton } from '@/components/features/requests/FollowButton';
 import { ImageGallery } from '@/components/features/requests/ImageGallery';

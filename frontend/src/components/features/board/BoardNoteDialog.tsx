@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
-import { inputClass, Modal, primaryButtonClass, secondaryButtonClass } from '@/csmju';
+import { inputClass, Modal, primaryButtonClass, secondaryButtonClass } from '@/components/ui';
 import { FormField } from '@/components/shared/FormField';
 import { LoadingButton } from '@/components/shared/LoadingButton';
 import { roomLineOf, titleOf, type Move } from './board-model';

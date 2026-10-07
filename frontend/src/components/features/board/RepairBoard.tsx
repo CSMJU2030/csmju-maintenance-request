@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { BoardIcon, MenuIcon } from '@/csmju';
+import { BoardIcon, MenuIcon } from '@/components/ui';
 import type { RepairRequestSummary } from '@/lib/types';
 import { BoardColumnsView } from './BoardColumnsView';
 import { BoardFilterBar } from './BoardFilterBar';

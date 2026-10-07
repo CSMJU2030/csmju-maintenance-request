@@ -8,7 +8,7 @@ import {
   primaryButtonClass,
   SearchIcon,
   secondaryButtonClass,
-} from '@/csmju';
+} from '@/components/ui';
 import { CsvExportButton } from '@/components/features/requests/CsvExportButton';
 import { RequestFilters } from '@/components/features/requests/RequestFilters';
 import { RequestList } from '@/components/features/requests/RequestList';

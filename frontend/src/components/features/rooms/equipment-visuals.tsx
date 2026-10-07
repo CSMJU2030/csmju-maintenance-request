@@ -15,7 +15,7 @@ import {
   ProjectorIcon,
   WarningIcon,
   type IconProps,
-} from '@/csmju';
+} from '@/components/ui';
 import { EQUIPMENT_STATE_LABEL, EQUIPMENT_STATES } from '@/lib/labels';
 import type { CategoryIcon as CategoryIconName, EquipmentState, Room } from '@/lib/types';
 

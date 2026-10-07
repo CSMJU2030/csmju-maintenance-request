@@ -13,7 +13,7 @@ import {
   SearchIcon,
   secondaryButtonClass,
   sectionTitleClass,
-} from '@/csmju';
+} from '@/components/ui';
 import { CategoryGlyph } from '@/components/features/rooms/equipment-visuals';
 import { groupRoomsByType } from '@/components/features/rooms/group-rooms';
 import { EquipmentCard, equipmentGridClass } from '@/components/features/rooms/EquipmentGrid';

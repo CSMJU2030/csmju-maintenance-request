@@ -1,5 +1,5 @@
 import type { ComponentType, ReactNode } from 'react';
-import { InventoryIcon, type IconProps } from '@/csmju';
+import { InventoryIcon, type IconProps } from '@/components/ui';
 
 /**
  * Empty state (ui-design-system.md ข้อ 9.2): ไอคอนเบา ๆ + เหตุผลที่ว่าง + ปุ่มทางออก

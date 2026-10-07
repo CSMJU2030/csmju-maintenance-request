@@ -1,0 +1,3 @@
+# ของกลางจาก standards/templates/csmju-subsystem-web — copy ทับทั้งไฟล์ ห้ามจัดรูปแบบใหม่ (ui-design-system.md ข้อ 17.0)
+src/csmju/
+src/app/globals.css

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useId, useRef, useState, type DragEvent, type KeyboardEvent } from 'react';
-import { ChevronDownIcon, LocationIcon, secondaryButtonClass, SwapIcon } from '@/csmju';
+import { ChevronDownIcon, LocationIcon, secondaryButtonClass, SwapIcon } from '@/components/ui';
 import { PriorityTag } from '@/components/features/requests/badges';
 import { formatNumber } from '@/lib/format';
 import type { RepairRequestSummary, RequestStatus } from '@/lib/types';
@@ -313,7 +313,7 @@ function MoveMenu({
                     close();
                     onMove(status);
                   }}
-                  className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-body-md text-on-surface hover:bg-primary-container/10 focus:bg-primary-container/10 focus:outline-none"
+                  className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-body-md text-on-surface hover:bg-primary-container/10 focus:bg-primary-container/10 focus:outline-hidden"
                 >
                   <span
                     className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md ${meta.soft} ${meta.ink}`}

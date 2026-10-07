@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { cardClass, NotificationsIcon, PageHeader, Tabs } from '@/csmju';
+import { cardClass, NotificationsIcon, PageHeader, Tabs } from '@/components/ui';
 import { MarkAllReadButton, NotificationList } from '@/components/features/NotificationList';
 import { ApiFailure } from '@/components/shared/ApiFailure';
 import { EmptyState } from '@/components/shared/EmptyState';

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { ApartmentIcon, cardClass, InfoIcon, linkClass, LocationIcon, PageHeader } from '@/csmju';
+import { ApartmentIcon, cardClass, InfoIcon, linkClass, LocationIcon, PageHeader } from '@/components/ui';
 import { NewRequestForm, type RequestDraft } from '@/components/features/requests/NewRequestForm';
 import { RequestStatusBadge } from '@/components/features/requests/badges';
 import { ForbiddenState } from '@/components/shared/ForbiddenState';

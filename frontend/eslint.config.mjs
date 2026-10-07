@@ -3,7 +3,8 @@ import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['.next/**', 'node_modules/**', 'next-env.d.ts', 'src/lib/api-schema.ts', '**/*.mjs'] },
+  // src/csmju/ มาจาก template ของมาตรฐาน — ห้ามแก้ จึงไม่ตรวจด้วยกฎของระบบนี้ (ui-design-system.md ข้อ 17.0)
+  { ignores: ['.next/**', 'node_modules/**', 'next-env.d.ts', 'src/lib/api-schema.ts', '**/*.mjs', 'src/csmju/**'] },
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   {

@@ -1,4 +1,4 @@
-import { LockIcon, secondaryButtonClass, tonalButtonClass } from '@/csmju';
+import { LockIcon, secondaryButtonClass, tonalButtonClass } from '@/components/ui';
 import { coreHubHomeUrl } from '@/lib/config';
 
 /** 403 FORBIDDEN (ข้อ 9.3): การ์ด "ไม่มีสิทธิ์" + ปุ่มกลับหน้าหลัก + ลิงก์ขอสิทธิ์เข้าใช้งาน */

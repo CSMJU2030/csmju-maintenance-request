@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { GroupIcon } from '@/csmju';
+import { GroupIcon } from '@/components/ui';
 import { EQUIPMENT_STATE_LABEL } from '@/lib/labels';
 import type { Equipment } from '@/lib/types';
 import { CategoryGlyph, EquipmentPhotoFallback, EquipmentStateBadge, STATE_STYLE } from './equipment-visuals';

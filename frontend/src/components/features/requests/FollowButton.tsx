@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { GroupIcon, secondaryButtonClass, tonalButtonClass } from '@/csmju';
+import { GroupIcon, secondaryButtonClass, tonalButtonClass } from '@/components/ui';
 import { LoadingButton } from '@/components/shared/LoadingButton';
 import { useToast } from '@/components/shared/Toast';
 import { api } from '@/lib/api';

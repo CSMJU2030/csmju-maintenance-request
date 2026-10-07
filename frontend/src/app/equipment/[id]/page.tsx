@@ -15,7 +15,7 @@ import {
   PageHeader,
   secondaryButtonClass,
   StatusBadge,
-} from '@/csmju';
+} from '@/components/ui';
 import { RequestStatusBadge } from '@/components/features/requests/badges';
 import { StatusStepper } from '@/components/features/requests/StatusStepper';
 import {
@@ -92,7 +92,7 @@ export default async function EquipmentPage(props: PageProps<'/equipment/[id]'>)
               {equipment.category.name}
             </span>
             <EquipmentStateBadge state={equipment.state} />
-            {equipment.isActive ? null : <StatusBadge tone="neutral">ปิดใช้งาน</StatusBadge>}
+            {equipment.isActive ? null : <StatusBadge tone="neutral" label="ปิดใช้งาน" />}
           </>
         }
         title={`${equipment.label} · ${equipment.name}`}
