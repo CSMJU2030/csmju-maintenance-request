@@ -25,6 +25,9 @@ const nextConfig: NextConfig = {
   // ปุ่ม dev tools ของ Next.js (เฉพาะตอน dev) ย้ายไปขวาล่าง ไม่ให้บังปุ่มออกจากระบบในแถบเมนูซ้าย
   devIndicators: { position: 'bottom-right' },
   output: 'standalone',
+  // pnpm เก็บ dependency ไว้ที่รากของ workspace — trace ต้องเริ่มที่ราก ไม่งั้น standalone ขาดแพ็กเกจ
+  // (templates/csmju-subsystem-web/next.config.ts · Dockerfile รัน frontend/server.js)
+  outputFileTracingRoot: resolve(__dirname, '..'),
   // frontend เป็นประตูเดียวของระบบ (connect-core-hub.md ข้อ 1): /api/* และ /auth/login · callback · logout
   // ส่งต่อไป backend — คุกกี้ <ชื่อระบบ>_access_token จึงถูกส่งไปกับทุกคำขอเอง
   async rewrites() {
