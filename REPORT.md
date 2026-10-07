@@ -1,6 +1,6 @@
 # REPORT — csmju-maintenance-request
 
-ระบบแจ้งซ่อม · ย้ายจาก standards 1.0.0 (สายที่ปิดแล้ว) เป็น **1.7.0** · branch `feature/repair/bump-standards-v1-7-0`
+ระบบแจ้งซ่อม · ย้ายจาก standards 1.0.0 (สายที่ปิดแล้ว) เป็น 1.7.0 แล้วเลื่อนเป็น **1.8.4** เพื่อขึ้น server กลาง (Docker web + api · deployment.md)
 
 ## ผลรัน
 
@@ -75,7 +75,7 @@ pnpm --filter frontend test    21 passed
 - คัดลอกจาก demo-student-subsystem (https://github.com/CSMJU2030/demo-student-subsystem) แบบไม่แก้: `backend/src/auth/**` · `common/**` ·
   `core-hub/**` · `config/env.validation.ts` · `health/**` · `main.ts` · `test/helpers/{token-factory,fake-core-hub}.ts` (อยู่ใน `.prettierignore`)
 - แก้ไข (ส่วนที่ reference ให้ปรับ): `role-mapping.ts` · `permissions.ts` · `core-hub-identity.ts` (role USER/TECHNICIAN/ADMIN) ·
-  `reference-datasets.ts` + `reference-data.types.ts` (เพิ่ม `buildings`) · `config/configuration.ts` (พอร์ต/ชื่อระบบ/`UPLOAD_DIR`) · spec ที่ผูกกับ role
+  `reference-datasets.ts` + `reference-data.types.ts` (เพิ่ม `buildings`) · `config/configuration.ts` (พอร์ต/ชื่อระบบ/`ADMIN_ACCOUNTS`) · spec ที่ผูกกับ role
 - ของระบบนี้: `src/actor/repair-actor.guard.ts` วางระหว่าง `CoreHubJwtGuard` กับ `PermissionsGuard`
 
 ## Role mapping ที่ประกาศ (ต้องตรงกับ default_role_mapping ในทะเบียน)
@@ -108,7 +108,7 @@ pnpm --filter frontend test    21 passed
    สิทธิ์พิเศษรายบุคคลของ Core Hub (subsystem-registry ข้อ 7) ยังไม่ใส่ role ใน token จึงใช้ค่าตั้ง `ADMIN_ACCOUNTS`
    (อีเมลจาก token ที่ตรวจแล้ว · เฉพาะ staff/lecturer) ตั้งที่ server ไม่อยู่ในโค้ดหรือ repo — เบี่ยงจากข้อห้ามรายชื่อผู้ใช้ ต้องแจ้ง PL
    และเลิกใช้เมื่อ Core Hub รองรับสิทธิ์พิเศษใน token
-9. **รูปงานซ่อมเก็บบนดิสก์** (`UPLOAD_DIR`, volume ใน Docker) ไม่ใช่ object storage
+9. **รูปที่อัปโหลดเก็บในฐานข้อมูล** (ตาราง `stored_files` · ไฟล์ละไม่เกิน 10 MB · ตรวจชนิดจาก byte ต้นไฟล์ · เก็บ sha256) — container อ่านอย่างเดียว (deployment.md ข้อ 3.4, 4.3) จึงไม่เขียนลงดิสก์
 10. **QR** — whitelist ไม่มีไลบรารี QR จึงเขียน encoder เอง (byte mode, v1–40, L/M/Q/H) · ทดสอบด้วยตัวถอดรหัสที่เขียนแยก
     (`frontend/src/lib/qr.test.ts`) และตรวจกับ jsQR ระหว่างพัฒนา 160/160
 11. **UI-03 (warn)** — `!important` มีเฉพาะใน `prefers-reduced-motion` ซึ่งมาตรฐานอนุญาต (ข้อ 3.6)

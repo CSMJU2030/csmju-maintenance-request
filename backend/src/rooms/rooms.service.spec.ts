@@ -1,7 +1,4 @@
-import { mkdtemp, readdir, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import type { ConfigService } from '@nestjs/config';
+import { fakeStoredFiles } from '../__tests__/fixtures';
 import type { BuildingsDirectory } from '../directory/buildings-directory';
 import type { PrismaService } from '../prisma/prisma.service';
 import { ImageStorage } from '../repair-images/image-storage';
@@ -61,21 +58,21 @@ describe('inventoryWhere', () => {
 });
 
 describe('RoomsService room photos', () => {
-  let dir: string;
+  let files: ReturnType<typeof fakeStoredFiles>;
   let storage: ImageStorage;
   let prisma: {
     room: { findUnique: jest.Mock; updateMany: jest.Mock };
   };
   let service: RoomsService;
+  const storedKeys = () => [...files.rows.keys()];
 
-  beforeEach(async () => {
-    dir = await mkdtemp(join(tmpdir(), 'room-photos-'));
-    storage = new ImageStorage({ get: () => dir } as unknown as ConfigService);
+  beforeEach(() => {
+    files = fakeStoredFiles();
+    storage = new ImageStorage({ storedFile: files.storedFile } as unknown as PrismaService);
     prisma = { room: { findUnique: jest.fn(), updateMany: jest.fn() } };
     service = new RoomsService(prisma as unknown as PrismaService, {} as BuildingsDirectory, storage);
     jest.spyOn(service, 'get').mockResolvedValue({ id: ROOM_ID } as never);
   });
-  afterEach(() => rm(dir, { recursive: true, force: true }));
 
   it('rejects files whose magic bytes are not JPG/PNG/WebP, writing nothing', async () => {
     prisma.room.findUnique.mockResolvedValue({ photoFilename: null });
@@ -83,25 +80,30 @@ describe('RoomsService room photos', () => {
       service.setRoomPhoto(ROOM_ID, photo(Buffer.from('<svg/>'), 'evil.jpg'), 'token'),
     ).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
     expect(prisma.room.updateMany).not.toHaveBeenCalled();
-    expect(await readdir(dir)).toEqual([]);
+    expect(storedKeys()).toEqual([]);
   });
 
   it('replaces the old file on upload', async () => {
     prisma.room.findUnique.mockResolvedValue({ photoFilename: null });
     prisma.room.updateMany.mockResolvedValue({ count: 1 });
     await service.setRoomPhoto(ROOM_ID, photo(JPEG), 'token');
-    const [first] = await readdir(dir);
-    expect(first).toMatch(/\.jpg$/);
+    const [first] = storedKeys();
+    expect(files.rows.get(first)?.mimeType).toBe('image/jpeg');
 
     prisma.room.findUnique.mockResolvedValue({ photoFilename: first });
     await service.setRoomPhoto(ROOM_ID, photo(PNG, 'room.png'), 'token');
-    const files = await readdir(dir);
-    expect(files).toHaveLength(1);
-    expect(files[0]).toMatch(/\.png$/);
+    const keys = storedKeys();
+    expect(keys).toHaveLength(1);
+    expect(files.rows.get(keys[0])?.mimeType).toBe('image/png');
     expect(prisma.room.updateMany).toHaveBeenLastCalledWith({
       where: { id: ROOM_ID, photoFilename: first },
-      data: { photoFilename: files[0] },
+      data: { photoFilename: keys[0] },
     });
+
+    // แถวยังชี้รูปเดิมที่ถูกลบไปแล้ว → 404 · ชี้รูปใหม่ → ได้ไบต์ของรูปใหม่
+    await expect(service.openRoomPhoto(ROOM_ID)).rejects.toMatchObject({ code: 'NOT_FOUND' });
+    prisma.room.findUnique.mockResolvedValue({ photoFilename: keys[0] });
+    expect(await service.openRoomPhoto(ROOM_ID)).toMatchObject({ mimeType: 'image/png', size: PNG.length });
   });
 
   it('drops the new file and answers 409 when another upload won the race', async () => {
@@ -110,7 +112,7 @@ describe('RoomsService room photos', () => {
     await expect(service.setRoomPhoto(ROOM_ID, photo(JPEG), 'token')).rejects.toMatchObject({
       code: 'CONFLICT',
     });
-    expect(await readdir(dir)).toEqual([]);
+    expect(storedKeys()).toEqual([]);
   });
 
   it('404s when the room has no photo', async () => {

@@ -11,7 +11,6 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -22,7 +21,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import type { Response } from 'express';
-import { MAX_IMAGE_BYTES, type UploadedImage } from '../repair-images/image-storage';
+import { sendImage, type UploadedImage } from '../repair-images/image-storage';
+import { ImageFileInterceptor } from '../repair-images/image-upload.interceptor';
 import { CoreHubAccessToken } from '../auth/decorators/core-hub-access-token.decorator';
 import { RequirePermissions } from '../auth/decorators/require-permissions.decorator';
 import { Permission } from '../auth/permissions';
@@ -45,9 +45,8 @@ import {
 } from './rooms.dto';
 import { RoomsService } from './rooms.service';
 
-/** multipart ช่อง photo ไฟล์เดียว — multer ตัดที่ 8 MB (เหมือนรูปโปรไฟล์) · service ตรวจ 5 MB และตอบเป็นภาษาไทย */
-const PhotoUpload = () =>
-  UseInterceptors(FileInterceptor('photo', { limits: { fileSize: MAX_IMAGE_BYTES, files: 1, fields: 0 } }));
+/** multipart ช่อง photo ไฟล์เดียว — multer ตัดที่ 10 MB (เหมือนรูปโปรไฟล์) · service ตรวจ 5 MB และตอบเป็นภาษาไทย */
+const PhotoUpload = () => UseInterceptors(ImageFileInterceptor('photo'));
 
 const PhotoBody = () =>
   ApiBody({
@@ -57,17 +56,6 @@ const PhotoBody = () =>
       properties: { photo: { type: 'string', format: 'binary' } },
     },
   });
-
-/** ส่งไฟล์รูปผ่าน @Res() เอง — ResponseInterceptor ของชั้นกลางห่อเฉพาะค่าที่ controller return */
-function sendPhoto(res: Response, file: { stream: NodeJS.ReadableStream; size: number; type: string }) {
-  // URL มี ?v= ที่เปลี่ยนเมื่อแก้ไข — cache ได้ยาวโดยไม่ค้างรูปเก่า
-  res.setHeader('Cache-Control', 'private, max-age=31536000, immutable');
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('Content-Type', file.type);
-  res.setHeader('Content-Length', String(file.size));
-  res.setHeader('Content-Disposition', 'inline');
-  file.stream.pipe(res);
-}
 
 /**
  * ห้อง → เครื่องในห้อง → แจ้งซ่อม · ทุกคนดูได้ (พร้อมสถานะของแต่ละเครื่อง)
@@ -160,7 +148,7 @@ export class RoomsController {
   @ApiResponse({ status: 200, description: 'ไฟล์รูป', schema: { type: 'string', format: 'binary' } })
   @ApiErrors(400, 403, 404)
   async roomPhoto(@Param('id', UuidParam) id: string, @Res() res: Response) {
-    sendPhoto(res, await this.rooms.openRoomPhoto(id));
+    sendImage(res, await this.rooms.openRoomPhoto(id));
   }
 
   @Post('rooms/:id/equipment')
@@ -250,7 +238,7 @@ export class RoomsController {
   @ApiResponse({ status: 200, description: 'ไฟล์รูป', schema: { type: 'string', format: 'binary' } })
   @ApiErrors(400, 403, 404)
   async equipmentPhoto(@Param('id', UuidParam) id: string, @Res() res: Response) {
-    sendPhoto(res, await this.rooms.openEquipmentPhoto(id));
+    sendImage(res, await this.rooms.openEquipmentPhoto(id));
   }
 
   @Get('qr-codes/:code')

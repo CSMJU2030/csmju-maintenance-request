@@ -9,8 +9,6 @@ export interface AppConfig {
   port: number;
   subsystemId: string;
   subsystemName: string;
-  /** ที่เก็บรูปงานซ่อมและรูปโปรไฟล์ (relative = นับจากโฟลเดอร์ backend/) */
-  uploadDir: string;
   /** อีเมลบัญชี Core Hub (core role staff/lecturer) ที่เป็นผู้ดูแลระบบแจ้งซ่อม — ADMIN_ACCOUNTS */
   adminAccounts: string[];
   coreHub: {
@@ -44,7 +42,6 @@ export default (): AppConfig => {
     port: num(process.env.PORT, 4221),
     subsystemId: process.env.SUBSYSTEM_ID ?? 'csmju-maintenance-request',
     subsystemName: process.env.SUBSYSTEM_NAME ?? 'ระบบแจ้งซ่อม',
-    uploadDir: process.env.UPLOAD_DIR ?? 'uploads',
     adminAccounts: parseAdminAccounts(process.env.ADMIN_ACCOUNTS),
     coreHub: {
       url: coreHubUrl,

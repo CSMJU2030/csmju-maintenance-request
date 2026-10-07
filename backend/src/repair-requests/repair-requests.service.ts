@@ -383,7 +383,7 @@ export class RepairRequestsService {
   async create(user: RepairActor, token: string, dto: CreateRepairRequestDto, files: UploadedImage[]) {
     const place = await this.placeFor(dto, token);
 
-    const stored = await this.storage.save(files);
+    const stored = await this.storage.save(files, user.coreUserId);
     try {
       const now = new Date();
       const priority = dto.priority ?? 'MEDIUM';
@@ -590,7 +590,7 @@ export class RepairRequestsService {
         ]);
       }
     }
-    const stored = await this.storage.save(files);
+    const stored = await this.storage.save(files, user.coreUserId);
     try {
       await this.prisma.$transaction(async (tx) => {
         await this.transition(tx, row, {

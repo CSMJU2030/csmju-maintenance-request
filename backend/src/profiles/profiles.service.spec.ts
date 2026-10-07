@@ -1,7 +1,4 @@
-import { mkdtemp, readdir, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import type { ConfigService } from '@nestjs/config';
+import { fakeStoredFiles } from '../__tests__/fixtures';
 import { ApiError } from '../shared/errors';
 import type { PrismaService } from '../prisma/prisma.service';
 import type { PeopleService } from '../core-hub/people.service';
@@ -20,6 +17,7 @@ type Row = { id: string; coreUserId: string; avatarFilename: string | null };
 /** Prisma ปลอมเฉพาะส่วนที่ service ใช้ — updateMany มีเงื่อนไขเหมือน UPDATE ... WHERE จริง */
 function fakePrisma(row: Row, beforeUpdate?: () => void) {
   return {
+    storedFile: files.storedFile,
     profile: {
       findUnique: async ({ where }: { where: { coreUserId?: string; id?: string } }) =>
         where.coreUserId === row.coreUserId || where.id === row.id ? { ...row } : null,
@@ -47,24 +45,30 @@ const codeOf = (promise: Promise<unknown>) =>
       error instanceof ApiError ? `${error.code}: ${error.details?.[0] ?? error.message}` : error,
   );
 
+let files: ReturnType<typeof fakeStoredFiles>;
+const storedKeys = () => [...files.rows.keys()];
+
 describe('รูปโปรไฟล์', () => {
-  let dir: string;
   let storage: ImageStorage;
   let row: Row;
   let service: ProfilesService;
 
-  beforeEach(async () => {
-    dir = await mkdtemp(join(tmpdir(), 'repair-avatars-'));
-    storage = new ImageStorage({ get: () => dir } as unknown as ConfigService);
+  beforeEach(() => {
+    files = fakeStoredFiles();
     row = { id: PROFILE_ID, coreUserId: 'user-002', avatarFilename: null };
-    service = new ProfilesService(fakePrisma(row), storage, {} as PeopleService, {} as PeopleDirectory);
+    const prisma = fakePrisma(row);
+    storage = new ImageStorage(prisma);
+    service = new ProfilesService(prisma, storage, {} as PeopleService, {} as PeopleDirectory);
   });
-  afterEach(() => rm(dir, { recursive: true, force: true }));
 
   it('stores the image and exposes a versioned URL', async () => {
     const profile = await service.setAvatar('user-002', file(PNG));
-    expect(profile.avatarFilename).toMatch(/^[0-9a-f-]{36}\.png$/);
-    expect(await readdir(dir)).toEqual([profile.avatarFilename]);
+    expect(profile.avatarFilename).toMatch(/^[0-9a-f-]{36}$/);
+    expect(storedKeys()).toEqual([profile.avatarFilename]);
+    expect(files.rows.get(profile.avatarFilename!)).toMatchObject({
+      mimeType: 'image/png',
+      uploadedByCoreUserId: 'user-002',
+    });
     expect(avatarUrlOf(profile)).toBe(
       `/api/v1/profiles/${PROFILE_ID}/avatar?v=${profile.avatarFilename?.slice(0, 8)}`,
     );
@@ -74,8 +78,8 @@ describe('รูปโปรไฟล์', () => {
   it('replaces the previous file instead of leaving it behind', async () => {
     const first = await service.setAvatar('user-002', file(PNG));
     const second = await service.setAvatar('user-002', file(JPEG));
-    expect(second.avatarFilename).toMatch(/\.jpg$/);
-    expect(await readdir(dir)).toEqual([second.avatarFilename]);
+    expect(files.rows.get(second.avatarFilename!)?.mimeType).toBe('image/jpeg');
+    expect(storedKeys()).toEqual([second.avatarFilename]);
     expect(first.avatarFilename).not.toBe(second.avatarFilename);
   });
 
@@ -90,28 +94,28 @@ describe('รูปโปรไฟล์', () => {
     expect(await codeOf(service.setAvatar('user-002', big))).toBe(
       'VALIDATION_ERROR: avatar: รูปโปรไฟล์ต้องไม่เกิน 2 MB',
     );
-    expect(await readdir(dir)).toEqual([]);
+    expect(storedKeys()).toEqual([]);
   });
 
   it('answers 409 and cleans up when another request changed the avatar first', async () => {
     const racing = new ProfilesService(
       fakePrisma(row, () => {
-        row.avatarFilename = '00000000-0000-4000-8000-000000000000.png';
+        row.avatarFilename = '00000000-0000-4000-8000-000000000000';
       }),
       storage,
       {} as PeopleService,
       {} as PeopleDirectory,
     );
     expect(await codeOf(racing.setAvatar('user-002', file(PNG)))).toMatch(/^CONFLICT/);
-    expect(await readdir(dir)).toEqual([]);
+    expect(storedKeys()).toEqual([]);
   });
 
   it('removes the avatar and its file, then 404s when there is nothing to remove', async () => {
     const profile = await service.setAvatar('user-002', file(PNG));
     const result = await service.removeAvatar('user-002');
-    expect(result).toEqual({ id: profile.avatarFilename?.split('.')[0], deleted: true });
+    expect(result).toEqual({ id: profile.avatarFilename, deleted: true });
     expect(row.avatarFilename).toBeNull();
-    expect(await readdir(dir)).toEqual([]);
+    expect(storedKeys()).toEqual([]);
     expect(await codeOf(service.removeAvatar('user-002'))).toMatch(/^NOT_FOUND/);
   });
 
@@ -119,8 +123,8 @@ describe('รูปโปรไฟล์', () => {
     expect(await codeOf(service.openAvatar(PROFILE_ID))).toMatch(/^NOT_FOUND/);
     await service.setAvatar('user-002', file(PNG));
     const opened = await service.openAvatar(PROFILE_ID);
-    expect(opened.type).toBe('image/png');
+    expect(opened.mimeType).toBe('image/png');
     expect(opened.size).toBe(PNG.length);
-    opened.stream.destroy();
+    expect(Buffer.from(opened.content).equals(PNG)).toBe(true);
   });
 });

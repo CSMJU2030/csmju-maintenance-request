@@ -3,7 +3,7 @@
 ระบบย่อยของโครงการ CSMJU2030 สำหรับแจ้งซ่อมอาคารและอุปกรณ์ ติดตามงานช่าง และดูสถิติ
 เข้าสู่ระบบผ่าน **Core Hub** เท่านั้น (Central SSO 1.1) — ระบบนี้ไม่มีหน้า login หรือฟอร์มรหัสผ่านของตัวเอง
 
-มาตรฐานกลางอยู่ใน `standards/` (submodule ของ CSMJU2030/csmju2030-standards · ตรึงที่ **v1.7.0** ตาม `.standards-version`)
+มาตรฐานกลางอยู่ใน `standards/` (submodule ของ CSMJU2030/csmju2030-standards · ตรึงที่ **v1.8.4** ตาม `.standards-version`)
 ผลตรวจล่าสุดและข้อสมมติทั้งหมดอยู่ใน [REPORT.md](REPORT.md)
 
 ## ความสามารถ
@@ -93,23 +93,31 @@ pnpm check          # ./standards/scripts/run-all-checks.sh . (ต้องม�
 CONFORMANCE_ACCOUNTS_FILE=~/.csmju/conformance-accounts.json pnpm conformance   # บัญชีอยู่นอก repo เท่านั้น
 ```
 
-ชื่อ branch `feature/repair/<เรื่อง>` · commit แบบ `<type>(repair): …` · อ่าน `standards/docs/github-workflow.md` ข้อ 1
+ชื่อ branch `feature/maintenance-request/<เรื่อง>` · commit แบบ `<type>(maintenance-request): …` · อ่าน `standards/docs/github-workflow.md` ข้อ 1
 เลื่อนเวอร์ชัน standards ตาม `standards/docs/standards-versioning.md` ข้อ 2 (แก้ `.standards-version` + submodule)
 
 ## รันทั้งระบบด้วย Docker
 
+แบบเดียวกับที่ server กลางของรายวิชารัน (standards `docs/deployment.md` · 2 container ต่อระบบ: web + api):
+
 ```bash
-docker compose --profile app up -d --build  # db + backend :4221 + frontend :3221
+docker compose up -d --build        # db + api + web → http://localhost:3221 (เปิดด้วย Chrome)
+docker compose ps                   # db · api · web ต้อง healthy
+docker compose logs api             # migration ผ่าน และ subsystem.started
+docker compose down                 # หยุด (ข้อมูลยังอยู่ใน volume)
 ```
 
-- backend รัน `prisma migrate deploy` ก่อนเริ่มทุกครั้ง · รูปงานซ่อมเก็บใน volume `repair_uploads`
-- `NEXT_PUBLIC_*` และ `BACKEND_URL` ถูกฝังตอน build ของ frontend (Next.js คำนวณ rewrites ตอน build) —
-  เปลี่ยนค่าแล้วต้อง build ใหม่
+- ใน container web ใช้พอร์ต `3000` · api `4000` (ชื่อ service `api` ห้ามเปลี่ยน — web ส่ง `/api/*` `/auth/*` ไปที่ `http://api:4000`)
+- api และ web ล็อกแบบ server: ระบบไฟล์อ่านอย่างเดียว · ไม่มี capability · RAM api 512m / web 384m
+- api รัน `prisma migrate deploy` ก่อนเริ่มทุกครั้ง (ประเภทอุปกรณ์ตั้งต้นมากับ migration) · รูปที่อัปโหลดเก็บในฐานข้อมูล
+  (ตาราง `stored_files`) ไม่เขียนลงดิสก์ของ container
+- `BACKEND_URL` และ `CORE_HUB_WEB_URL` ถูกฝังตอน build ของ web (Next.js คำนวณ rewrites ตอน build) — เปลี่ยนค่าแล้วต้อง build ใหม่
+- env ของ api บน server มาจาก `backend/.env.example` (DevOps ตั้งตามไฟล์นี้) · ผู้ดูแลระบบแจ้งซ่อมตั้งด้วย `ADMIN_ACCOUNTS`
 - frontend เป็นประตูเดียวของระบบ (ส่งต่อ `/api/*` และ `/auth/login` `/auth/callback` `/auth/logout` ให้ backend)
   ขึ้น host จริงแล้วให้ admin ระบบกลางเปลี่ยน Callback URL เป็น `https://<โดเมน>/auth/callback` และตั้ง `NODE_ENV=production`
 
 ## ตัวแปร environment
 
 คำอธิบายทุกตัวอยู่ใน [.env.example](.env.example) — ที่สำคัญคือ `DATABASE_URL` (ของระบบนี้เท่านั้น),
-`CORE_HUB_URL` / `CORE_HUB_JWKS_URL` / `CORE_HUB_WEB_URL`, `SUBSYSTEM_ID=csmju-maintenance-request`, `UPLOAD_DIR`,
+`CORE_HUB_URL` / `CORE_HUB_JWKS_URL` / `CORE_HUB_WEB_URL`, `SUBSYSTEM_ID=csmju-maintenance-request`,
 `BACKEND_URL` และ `NEXT_PUBLIC_CORE_HUB_URL`

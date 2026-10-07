@@ -73,11 +73,6 @@ export function inventoryWhere(query: ListEquipmentQueryDto): Prisma.EquipmentWh
   };
 }
 
-const mimeTypeOf = (filename: string) => {
-  const extension = filename.split('.').pop();
-  return extension === 'png' ? 'image/png' : extension === 'webp' ? 'image/webp' : 'image/jpeg';
-};
-
 /** ใบที่ยังไม่ปิด → สถานะที่แสดงบนการ์ดเครื่อง */
 export function stateOf(status: RequestStatus | undefined): EquipmentState {
   switch (status) {
@@ -517,7 +512,7 @@ export class RoomsService {
   }
 
   /**
-   * เขียนรูปใหม่ (ImageStorage ตรวจ magic bytes) → เปลี่ยนชื่อไฟล์ในฐานข้อมูลแบบมีเงื่อนไข → ลบรูปเดิม
+   * บันทึกรูปใหม่ (ImageStorage ตรวจ magic bytes) → เปลี่ยน id รูปในแถวแบบมีเงื่อนไข → ลบรูปเดิม
    * ถ้ามีการเปลี่ยนรูปพร้อมกันอีกคำขอ (commit คืน 0) ให้ลบไฟล์ใหม่ทิ้งแล้วตอบ 409
    */
   private async swapPhoto(
@@ -544,7 +539,7 @@ export class RoomsService {
     if (!filename) throw notFound(missing);
     const file = await this.storage.open(filename);
     if (!file) throw notFound('ไฟล์รูปนี้ไม่อยู่ในที่เก็บแล้ว');
-    return { ...file, type: mimeTypeOf(filename) };
+    return file;
   }
 
   private async mustRoom(id: string) {
