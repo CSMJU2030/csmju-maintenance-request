@@ -47,7 +47,7 @@ export const dynamic = 'force-dynamic';
 
 /** เมนูตามสิทธิ์ (ข้อ 10) — icon ใช้ชื่อจาก NavIconName ของ template */
 function navFor(user: Me): NavItem[] {
-  const items: NavItem[] = [{ label: 'ภาพรวม', labelEn: 'Overview', href: '/', icon: 'dashboard' }];
+  const items: NavItem[] = [{ label: 'Home', href: '/', icon: 'dashboard' }];
   if (can(user, P.REQUEST_CREATE))
     items.push({ label: 'ใบแจ้งซ่อมของฉัน', labelEn: 'My requests', href: '/requests', icon: 'description' });
   items.push(

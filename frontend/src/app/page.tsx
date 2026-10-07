@@ -36,7 +36,7 @@ import { serverApi, type ServerResult } from '@/lib/server-api';
 import { getMe } from '@/lib/session';
 import type { RepairRequestSummary, Room, Statistics } from '@/lib/types';
 
-export const metadata: Metadata = { title: 'ภาพรวม' };
+export const metadata: Metadata = { title: 'Home' };
 
 const DAY = 86_400_000;
 /** วันที่ (YYYY-MM-DD เวลาไทย) ย้อนหลัง n วันจากวันนี้ */

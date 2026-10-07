@@ -43,11 +43,11 @@
 }
 
 /* กระดิ่งบน top bar ของ CsmjuAppShell — จุดแดงเมื่อมีรายการที่ยังไม่อ่าน (ข้อ 5.1 · ตั้งโดย ShellBridge) */
-header button[data-unread] {
+#main > header button[data-unread] {
   position: relative;
 }
 
-header button[data-unread]::after {
+#main > header button[data-unread]::after {
   content: '';
   position: absolute;
   top: 6px;
