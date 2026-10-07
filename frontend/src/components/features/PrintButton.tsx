@@ -1,6 +1,6 @@
 'use client';
 
-import { primaryButtonClass, PrintIcon } from '@/csmju';
+import { primaryButtonClass, PrintIcon } from '@/components/ui';
 
 export function PrintButton({ label = 'พิมพ์' }: { label?: string }) {
   return (

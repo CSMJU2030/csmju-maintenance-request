@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react';
-import { BlockIcon, BuildIcon, CheckIcon, PauseIcon, ScheduleIcon, type IconProps } from '@/csmju';
+import { BlockIcon, BuildIcon, CheckIcon, PauseIcon, ScheduleIcon, type IconProps } from '@/components/ui';
 import { formatDateTime, formatDuration } from '@/lib/format';
 import { STATUS_LABEL } from '@/lib/labels';
 import type { RepairRequestDetail, RequestStatus } from '@/lib/types';

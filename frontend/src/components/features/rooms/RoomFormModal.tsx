@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
-import { inputClass, Modal, primaryButtonClass, secondaryButtonClass } from '@/csmju';
+import { inputClass, Modal, primaryButtonClass, secondaryButtonClass } from '@/components/ui';
 import { describedBy, FormField } from '@/components/shared/FormField';
 import { LoadingButton } from '@/components/shared/LoadingButton';
 import { useToast } from '@/components/shared/Toast';

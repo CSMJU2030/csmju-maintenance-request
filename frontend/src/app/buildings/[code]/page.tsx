@@ -2,7 +2,14 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
-import { ArrowBackIcon, cardClass, linkClass, PageHeader, sectionTitleClass, StatusBadge } from '@/csmju';
+import {
+  ArrowBackIcon,
+  cardClass,
+  linkClass,
+  PageHeader,
+  sectionTitleClass,
+  StatusBadge,
+} from '@/components/ui';
 import { RoomCard } from '@/components/features/rooms/RoomCard';
 import { AddRoomButton } from '@/components/features/rooms/RoomAdminTools';
 import { ApiFailure } from '@/components/shared/ApiFailure';
@@ -61,7 +68,7 @@ export default async function BuildingPage(props: PageProps<'/buildings/[code]'>
         eyebrow={
           <>
             <span className="text-label-md text-primary-container tabular-nums">{building.code}</span>
-            {building.isActive ? null : <StatusBadge tone="neutral">ปิดใช้งาน</StatusBadge>}
+            {building.isActive ? null : <StatusBadge tone="neutral" label="ปิดใช้งาน" />}
           </>
         }
         title={building.name}

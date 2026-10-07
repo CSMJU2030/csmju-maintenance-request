@@ -1,4 +1,4 @@
-import { TONE_DOT_CLASS, type StatusTone } from '@/csmju';
+import { TONE_DOT_CLASS, type StatusTone } from '@/components/ui';
 import { formatDate, formatMonth, formatNumber } from '@/lib/format';
 
 /**

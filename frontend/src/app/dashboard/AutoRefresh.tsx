@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useTransition } from 'react';
-import { RefreshIcon, secondaryButtonClass } from '@/csmju';
+import { RefreshIcon, secondaryButtonClass } from '@/components/ui';
 import { formatTime } from '@/lib/format';
 
 /**

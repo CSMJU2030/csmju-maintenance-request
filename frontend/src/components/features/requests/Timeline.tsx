@@ -1,4 +1,13 @@
-import { AddIcon, ChatIcon, EditIcon, GroupIcon, HistoryIcon, PersonIcon, StarIcon, SwapIcon } from '@/csmju';
+import {
+  AddIcon,
+  ChatIcon,
+  EditIcon,
+  GroupIcon,
+  HistoryIcon,
+  PersonIcon,
+  StarIcon,
+  SwapIcon,
+} from '@/components/ui';
 import { formatTimestamp } from '@/lib/format';
 import { STATUS_LABEL } from '@/lib/labels';
 import type { RequestActivity } from '@/lib/types';

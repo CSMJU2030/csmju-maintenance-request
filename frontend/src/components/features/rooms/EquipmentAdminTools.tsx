@@ -2,7 +2,14 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { BlockIcon, ConfirmDeleteModal, DeleteIcon, EditIcon, PlayIcon, secondaryButtonClass } from '@/csmju';
+import {
+  BlockIcon,
+  ConfirmDeleteModal,
+  DeleteIcon,
+  EditIcon,
+  PlayIcon,
+  secondaryButtonClass,
+} from '@/components/ui';
 import { LoadingButton } from '@/components/shared/LoadingButton';
 import { useToast } from '@/components/shared/Toast';
 import { api } from '@/lib/api';

@@ -1,6 +1,6 @@
 'use client';
 
-import { CloseIcon, FilterIcon, inputClass, SearchIcon, secondaryButtonClass } from '@/csmju';
+import { CloseIcon, FilterIcon, inputClass, SearchIcon, secondaryButtonClass } from '@/components/ui';
 import { formatNumber } from '@/lib/format';
 import type { BoardFilters } from './useBoard';
 

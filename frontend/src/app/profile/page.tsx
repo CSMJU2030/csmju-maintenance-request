@@ -1,6 +1,13 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
-import { cardClass, cardHeaderClass, cardTitleClass, InfoIcon, PageHeader, StatusBadge } from '@/csmju';
+import {
+  cardClass,
+  cardHeaderClass,
+  cardTitleClass,
+  InfoIcon,
+  PageHeader,
+  StatusBadge,
+} from '@/components/ui';
 import { AvatarEditor } from '@/components/features/AvatarEditor';
 import { ApiFailure } from '@/components/shared/ApiFailure';
 import { CORE_HUB_URL } from '@/lib/config';
@@ -67,10 +74,10 @@ export default async function ProfilePage() {
                 <span className="tabular-nums">{user.personCode ?? 'ยังไม่ผูกกับทะเบียนบุคคล'}</span>
               </Row>
               <Row label="บทบาทใน CSMJU">
-                <StatusBadge tone="neutral">{CORE_ROLE_LABEL[user.coreRole] ?? user.coreRole}</StatusBadge>
+                <StatusBadge tone="neutral" label={CORE_ROLE_LABEL[user.coreRole] ?? user.coreRole} />
               </Row>
               <Row label="บทบาทในระบบแจ้งซ่อม">
-                <StatusBadge tone="info">{SUBSYSTEM_ROLE_LABEL[user.subsystemRole]}</StatusBadge>
+                <StatusBadge tone="info" label={SUBSYSTEM_ROLE_LABEL[user.subsystemRole]} />
               </Row>
               <Row label="เข้าสู่ระบบถึง">
                 <time dateTime={user.session.expiresAt}>{formatDateTime(user.session.expiresAt)}</time>

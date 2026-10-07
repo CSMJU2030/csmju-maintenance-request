@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowBackIcon, PageHeader, secondaryButtonClass } from '@/csmju';
+import { ArrowBackIcon, PageHeader, secondaryButtonClass } from '@/components/ui';
 import { OriginQrCode } from '@/components/features/OriginQrCode';
 import { PrintButton } from '@/components/features/PrintButton';
 import { groupByCategory } from '@/components/features/rooms/EquipmentGrid';

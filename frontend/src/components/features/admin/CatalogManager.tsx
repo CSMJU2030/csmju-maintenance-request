@@ -21,7 +21,7 @@ import {
   theadRowClass,
   thClass,
   tonalButtonClass,
-} from '@/csmju';
+} from '@/components/ui';
 import { CategoryGlyph } from '@/components/features/rooms/equipment-visuals';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { describedBy, FormField } from '@/components/shared/FormField';
@@ -144,9 +144,10 @@ export function CatalogManager({ items }: { items: Category[] }) {
           }`}
         />
       </span>
-      <StatusBadge tone={item.isActive ? 'success' : 'neutral'}>
-        {item.isActive ? 'เปิดใช้งาน' : 'ปิดการใช้งาน'}
-      </StatusBadge>
+      <StatusBadge
+        tone={item.isActive ? 'success' : 'neutral'}
+        label={item.isActive ? 'เปิดใช้งาน' : 'ปิดการใช้งาน'}
+      />
     </button>
   );
 

@@ -14,7 +14,7 @@ import {
   primaryButtonClass,
   secondaryButtonClass,
   dangerButtonClass,
-} from '@/csmju';
+} from '@/components/ui';
 import { FormField } from '@/components/shared/FormField';
 import { LoadingButton } from '@/components/shared/LoadingButton';
 import { useToast } from '@/components/shared/Toast';

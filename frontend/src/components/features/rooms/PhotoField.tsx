@@ -1,7 +1,14 @@
 'use client';
 
 import { useEffect, useId, useRef, useState, type ChangeEvent, type ReactNode } from 'react';
-import { CameraIcon, DeleteIcon, ErrorIcon, fieldErrorClass, hintClass, secondaryButtonClass } from '@/csmju';
+import {
+  CameraIcon,
+  DeleteIcon,
+  ErrorIcon,
+  fieldErrorClass,
+  hintClass,
+  secondaryButtonClass,
+} from '@/components/ui';
 import { LoadingButton } from '@/components/shared/LoadingButton';
 import { api, ApiRequestError } from '@/lib/api';
 import { prepareImage } from '@/lib/image-resize';

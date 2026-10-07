@@ -1,21 +1,22 @@
 import type { Metadata, Viewport } from 'next';
 import { Noto_Sans_Thai, Plus_Jakarta_Sans } from 'next/font/google';
 import { cookies } from 'next/headers';
-import { CsmjuAppShell, SIDEBAR_COOKIE, type ShellNavItem } from '@/csmju';
+import { CsmjuAppShell, type NavItem } from '@/csmju';
 import { CommandPalette } from '@/components/features/CommandPalette';
-import { NotificationBell } from '@/components/features/NotificationBell';
 import { ErrorState } from '@/components/shared/ErrorState';
 import { ForbiddenState } from '@/components/shared/ForbiddenState';
+import { SessionKeeper } from '@/components/shared/SessionKeeper';
 import { SessionRedirect } from '@/components/shared/SessionRedirect';
-import { ToastProvider } from '@/components/shared/Toast';
+import { ShellBridge } from '@/components/shared/ShellBridge';
 import { SignedOut } from '@/components/shared/SignedOut';
-import { coreHubHomeUrl, DISPLAY_NAME, LOGOUT_ACTION, SESSION_COOKIE, SUBSYSTEM_ID } from '@/lib/config';
+import { ToastProvider } from '@/components/shared/Toast';
+import { initialsOf } from '@/components/ui/initials';
+import { coreHubHomeUrl, DISPLAY_NAME, SESSION_COOKIE } from '@/lib/config';
 import { CORE_ROLE_LABEL, SUBSYSTEM_ROLE_LABEL } from '@/lib/labels';
 import { can, P } from '@/lib/permissions';
 import { getMe } from '@/lib/session';
 import type { Me } from '@/lib/types';
-import { tokens } from '@/theme.config';
-import './globals.css';
+import './app.css';
 
 const jakarta = Plus_Jakarta_Sans({
   variable: '--font-jakarta',
@@ -39,34 +40,34 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: tokens['brand-navy'],
 };
 
 // ข้อมูลทุกหน้าขึ้นกับตัวตนผู้ใช้ — ห้าม cache (ui-design-system.md ข้อ 16.1.1)
 export const dynamic = 'force-dynamic';
 
-function navFor(user: Me): ShellNavItem[] {
-  const items: ShellNavItem[] = [
-    { label: 'ภาพรวม', labelEn: 'Overview', href: '/', icon: 'dashboard', exact: true },
-  ];
+/** เมนูตามสิทธิ์ (ข้อ 10) — icon ใช้ชื่อจาก NavIconName ของ template */
+function navFor(user: Me): NavItem[] {
+  const items: NavItem[] = [{ label: 'ภาพรวม', labelEn: 'Overview', href: '/', icon: 'dashboard' }];
   if (can(user, P.REQUEST_CREATE))
-    items.push({ label: 'ใบแจ้งซ่อมของฉัน', labelEn: 'My requests', href: '/requests', icon: 'assignment' });
+    items.push({ label: 'ใบแจ้งซ่อมของฉัน', labelEn: 'My requests', href: '/requests', icon: 'description' });
   items.push(
-    { label: 'อาคารและห้อง', labelEn: 'Rooms', href: '/buildings', icon: 'apartment' },
-    { label: 'ประเภทอุปกรณ์', labelEn: 'Equipment', href: '/equipment', icon: 'category' },
+    { label: 'อาคารและห้อง', labelEn: 'Rooms', href: '/buildings', icon: 'meeting-room' },
+    { label: 'ประเภทอุปกรณ์', labelEn: 'Equipment', href: '/equipment', icon: 'menu-book' },
   );
   // บอร์ดงานรวมคิวงานและความเคลื่อนไหวล่าสุดไว้หน้าเดียว
   if (can(user, P.JOB_ACCEPT))
-    items.push({ label: 'บอร์ดงานซ่อม', labelEn: 'Board', href: '/board', icon: 'board' });
+    items.push({ label: 'บอร์ดงานซ่อม', labelEn: 'Board', href: '/board', icon: 'event' });
   if (can(user, P.STATISTICS_READ))
-    items.push({ label: 'สถิติการแจ้งซ่อม', labelEn: 'Statistics', href: '/dashboard', icon: 'chart' });
-  if (!can(user, P.JOB_ACCEPT))
+    items.push({ label: 'สถิติการแจ้งซ่อม', labelEn: 'Statistics', href: '/dashboard', icon: 'receipt' });
+  if (can(user, P.CATEGORY_CREATE))
     items.push({
-      label: 'การแจ้งเตือน',
-      labelEn: 'Notifications',
-      href: '/notifications',
-      icon: 'notifications',
+      label: 'หมวดหมู่งานซ่อม',
+      labelEn: 'Categories',
+      href: '/admin/categories',
+      icon: 'settings',
     });
+  if (!can(user, P.JOB_ACCEPT))
+    items.push({ label: 'การแจ้งเตือน', labelEn: 'Notifications', href: '/notifications', icon: 'campaign' });
   return items;
 }
 
@@ -90,7 +91,6 @@ async function Shell({ children }: { children: React.ReactNode }) {
   }
 
   const user = me.data;
-  const sidebarPinned = cookieStore.get(SIDEBAR_COOKIE)?.value === 'pinned';
   const roleLabel =
     user.subsystemRole === 'USER'
       ? (CORE_ROLE_LABEL[user.coreRole] ?? SUBSYSTEM_ROLE_LABEL.USER)
@@ -99,25 +99,15 @@ async function Shell({ children }: { children: React.ReactNode }) {
   return (
     <ToastProvider>
       <CsmjuAppShell
-        subsystemName={SUBSYSTEM_ID}
         displayName={DISPLAY_NAME}
         nav={navFor(user)}
-        user={{
-          displayName: user.displayName,
-          detail: user.personCode,
-          roleLabel,
-          avatarUrl: user.avatarUrl,
-        }}
         primaryAction={can(user, P.REQUEST_CREATE) ? { label: 'แจ้งซ่อม', href: '/requests/new' } : undefined}
-        searchSlot={
-          <CommandPalette canSeeAll={can(user, P.REQUEST_READ_ANY)} isAdmin={can(user, P.PROFILE_READ_ANY)} />
-        }
-        notificationsSlot={can(user, P.JOB_ACCEPT) ? undefined : <NotificationBell />}
-        homeHref={coreHubHomeUrl() ?? undefined}
-        logoutAction={LOGOUT_ACTION}
-        sessionExpiresAt={user.session.expiresAt}
-        initialPinned={sidebarPinned}
+        user={{ initials: initialsOf(user.displayName), roleLabel }}
+        coreHubUrl={coreHubHomeUrl() ?? undefined}
       >
+        <SessionKeeper expiresAt={user.session.expiresAt} />
+        <ShellBridge notificationsHref={can(user, P.JOB_ACCEPT) ? '/board' : '/notifications'} />
+        <CommandPalette canSeeAll={can(user, P.REQUEST_READ_ANY)} isAdmin={can(user, P.PROFILE_READ_ANY)} />
         {children}
       </CsmjuAppShell>
     </ToastProvider>
@@ -127,7 +117,7 @@ async function Shell({ children }: { children: React.ReactNode }) {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="th" className={`${jakarta.variable} ${notoSansThai.variable} h-full antialiased`}>
-      <body className="min-h-full font-body">
+      <body className="flex min-h-full flex-col bg-background text-on-surface">
         <Shell>{children}</Shell>
       </body>
     </html>

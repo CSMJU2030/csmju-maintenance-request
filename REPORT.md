@@ -92,8 +92,10 @@ pnpm --filter frontend test    21 passed
 
 1. **เวอร์ชัน standards** — ใช้ 1.7.0 ทั้งชุด (สาย 1.0.x ปิดแล้ว) · ฟอนต์ Noto Sans Thai + Plus Jakarta Sans และ palette Material 3 ตาม `ui-design-system.md`
 2. **Tailwind v3.4 แทน v4** — `@tailwindcss/postcss` ไม่อยู่ใน whitelist · ใช้ชื่อ class/token เดียวกับมาตรฐาน ย้ายเป็น v4 ได้โดยไม่แก้หน้าเว็บ
-3. **`src/csmju` แทน template `csmju-subsystem-web` และ `@csmju/core-sdk`** ที่ยังไม่เผยแพร่ — ชื่อ component/สไตล์ตามมาตรฐาน ·
-   โลโก้เป็นตัวแทน (เข้าถึง `csmju-core-hub/frontend/public/csmju-logo.png` ไม่ได้)
+3. **หน้าเว็บใช้ template `csmju-subsystem-web` ของ standards 1.8.4** — `src/csmju/` · `src/app/globals.css` · `public/csmju-logo.png`
+   copy ทั้งไฟล์ (ห้ามแก้ · Tailwind v4) · ส่วนที่ template ยังไม่มีเป็น local component ใน `src/components/ui/`
+   (ประกาศใน `subsystem.yaml` → `ui.local_components`) และ `src/app/app.css` (สีกราฟ ข้อ 3.8 · ค่าเริ่มต้นขอบของ v3)
+   · ปุ่มบน top bar ของ `CsmjuAppShell` (ค้นหา · กระดิ่ง · ผู้ใช้) ต่อเข้ากับระบบด้วย `ShellBridge` โดยไม่แก้ไฟล์ของ template
 4. **ข้อขัดกันใน ui-design-system.md ข้อ 16.1.2** — ข้อ 5 (JSON เป็น snake_case) และข้อ 6 (อ่านผู้ใช้จาก header `X-User-Id` ของ gateway)
    ขัดกับ `api-conventions.md` / `auth-contract.md` และ conformance → ทำตามสองเอกสารหลัง (JSON camelCase, ตรวจ JWT เองด้วย JWKS)
 5. **endpoint ไฟล์รูป** `GET /api/v1/repair-images/:id/file` และ `GET /api/v1/profiles/:id/avatar` ตอบเป็นไฟล์ภาพ ไม่ใช่ envelope JSON
@@ -115,13 +117,7 @@ pnpm --filter frontend test    21 passed
 12. **⚠️ ห้องและเครื่องเก็บในระบบนี้** — `reference-data.md` ให้ห้องเป็นข้อมูลกลาง แต่ Core Hub ยังไม่มี dataset ห้อง/ครุภัณฑ์ของสาขา
     เจ้าของระบบจึงให้ผู้ดูแลสร้างห้องเอง (ตาราง `rooms` · `equipment` ผูก `building_code` ของ Core Hub) — ต้องขอข้อยกเว้นจาก PL
     และย้ายไปใช้ dataset กลางเมื่อมี
-13. **⚠️ เบี่ยงจากสเปค AppShell (ตามคำขอของเจ้าของระบบ 2026-09-25)** — บนจอ md+ sidebar ย่อเป็นแถบไอคอน 72px
-    และกางเป็น 256px แบบมาตรฐานเมื่อชี้เมาส์หรือกด Tab เข้าไป (กางทับเนื้อหา ไม่ดันหน้า) · ปุ่ม "ตรึงแถบเมนูไว้"
-    กลับเป็น sidebar กางตลอดตามสเปค (จำค่าในคุกกี้ `csmju_sidebar`) · ปุ่มกลับหน้าหลัก/ออกจากระบบยังอยู่ล่างซ้ายตำแหน่งเดิม ·
-    มือถือยังเป็น drawer ตามสเปค — ถ้า PL ไม่อนุมัติ ให้ตั้งค่าเริ่มต้นเป็นตรึงไว้ (`initialPinned`) หรือใช้ AppShell จาก template แทน ·
-    เมื่อระบบปฏิบัติการตั้ง `prefers-reduced-motion` (เช่น Windows ปิด Animation effects) แถบจะกาง/หุบทันทีตามกฎข้อ 3.6
-    และใช้การจางของข้อความ 150ms แทนการเลื่อน · กรอบโลโก้กว้างเต็มแผง ·
-    เมนูผู้ใช้บน top bar แสดงแค่ avatar (สเปคให้มีชื่อบทบาทข้าง avatar บน desktop) กดแล้วจึงเห็นชื่อ อีเมล และบทบาท
+13. **AppShell ตามมาตรฐาน** — เลิกใช้แถบไอคอน 72px ที่เคยเบี่ยงจากสเปค (คำขอเจ้าของระบบ 2026-09-25) ใช้ `CsmjuAppShell` ของ template แทน (sidebar 256px)
 14. **แยกสถานะ 3 เรื่องด้วยรูปแบบ ไม่ใช่สีอย่างเดียว** (สีและ badge ใช้ของมาตรฐานทั้งหมด) — สถานะงาน = badge มีจุดสี +
     แถบสีซ้ายของแถวรายการ · ความเร่งด่วน = tag ไม่มีจุด + ลูกศรบอกระดับ (สีเฉพาะด่วน/ด่วนมาก) · กำหนดเสร็จ = ข้อความ + ไอคอนนาฬิกา
     (สีเฉพาะใกล้/เกินกำหนด) · กราฟสถิติตามสถานะ/ความเร่งด่วนใช้สีเดียวกับ badge · ตัวนับแท็บ "เกินกำหนด" เป็นสีแดง

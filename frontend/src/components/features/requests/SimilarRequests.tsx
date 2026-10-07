@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { GroupIcon, InfoIcon, primaryButtonClass, secondaryButtonClass } from '@/csmju';
+import { GroupIcon, InfoIcon, primaryButtonClass, secondaryButtonClass } from '@/components/ui';
 import { LoadingButton } from '@/components/shared/LoadingButton';
 import { useToast } from '@/components/shared/Toast';
 import { api, toQuery } from '@/lib/api';

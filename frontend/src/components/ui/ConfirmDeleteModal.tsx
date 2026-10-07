@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { Modal } from './Modal';
-import { dangerButtonClass, secondaryButtonClass } from './ui';
+import { dangerButtonClass, secondaryButtonClass } from './classes';
 
 /**
  * ยืนยันการลบ (ข้อ 8.3) — ระบุชื่อสิ่งที่จะลบ + ผลที่ตามมา · ปุ่ม [ยกเลิก] [ลบ…]

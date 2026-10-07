@@ -7,7 +7,7 @@ import {
   PauseIcon,
   PlayIcon,
   type IconProps,
-} from '@/csmju';
+} from '@/components/ui';
 import { floorLabel } from '@/lib/format';
 import type { RepairRequestSummary, RequestAction, RequestStatus } from '@/lib/types';
 

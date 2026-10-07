@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { cardClass, PageHeader } from '@/csmju';
+import { cardClass, PageHeader } from '@/components/ui';
 import { CatalogManager } from '@/components/features/admin/CatalogManager';
 import { ApiFailure } from '@/components/shared/ApiFailure';
 import { serverApi } from '@/lib/server-api';

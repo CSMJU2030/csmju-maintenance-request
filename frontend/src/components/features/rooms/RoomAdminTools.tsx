@@ -13,7 +13,7 @@ import {
   primaryButtonClass,
   QrCodeIcon,
   secondaryButtonClass,
-} from '@/csmju';
+} from '@/components/ui';
 import { LoadingButton } from '@/components/shared/LoadingButton';
 import { useToast } from '@/components/shared/Toast';
 import { api } from '@/lib/api';

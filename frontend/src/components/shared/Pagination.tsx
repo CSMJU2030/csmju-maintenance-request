@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ChevronLeftIcon, ChevronRightIcon } from '@/csmju';
+import { ChevronLeftIcon, ChevronRightIcon } from '@/components/ui';
 import { formatNumber } from '@/lib/format';
 import type { PageMeta } from '@/lib/types';
 

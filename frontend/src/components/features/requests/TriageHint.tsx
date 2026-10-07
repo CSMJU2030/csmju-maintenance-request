@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CheckIcon, tonalButtonClass, WarningIcon } from '@/csmju';
+import { CheckIcon, tonalButtonClass, WarningIcon } from '@/components/ui';
 import { PRIORITY_LABEL } from '@/lib/labels';
 import { suggestTriage, type CategoryOption } from '@/lib/triage';
 import type { Priority } from '@/lib/types';

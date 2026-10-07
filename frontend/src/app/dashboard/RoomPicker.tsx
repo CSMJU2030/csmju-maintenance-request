@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useId, useTransition } from 'react';
-import { inputClass } from '@/csmju';
+import { inputClass } from '@/components/ui';
 
 export type RoomOption = { id: string; label: string; group: string };
 

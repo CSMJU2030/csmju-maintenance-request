@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { PageHeader, secondaryButtonClass, tonalButtonClass } from '@/csmju';
+import { PageHeader, secondaryButtonClass, tonalButtonClass } from '@/components/ui';
 import { BoardActivity } from '@/components/features/board/BoardActivity';
 import { RepairBoard } from '@/components/features/board/RepairBoard';
 import { boardHref } from '@/components/features/board/board-model';

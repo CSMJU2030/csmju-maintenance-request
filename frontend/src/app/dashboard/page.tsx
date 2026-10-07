@@ -20,7 +20,7 @@ import {
   thClass,
   WarningIcon,
   AssignmentIcon,
-} from '@/csmju';
+} from '@/components/ui';
 import { BarList, RatioBar, TrendChart } from '@/components/features/charts';
 import { RequestList } from '@/components/features/requests/RequestList';
 import { CategoryGlyph } from '@/components/features/rooms/equipment-visuals';

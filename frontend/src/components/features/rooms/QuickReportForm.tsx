@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useRef, useState, type FormEvent } from 'react';
-import { CheckIcon, inputClass, primaryButtonClass } from '@/csmju';
+import { CheckIcon, inputClass, primaryButtonClass } from '@/components/ui';
 import { PhotoPicker, type PickedPhoto } from '@/components/features/requests/PhotoPicker';
 import { TriageHint } from '@/components/features/requests/TriageHint';
 import { describedBy, FormField } from '@/components/shared/FormField';

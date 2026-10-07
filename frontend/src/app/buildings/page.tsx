@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { ApartmentIcon, cardClass, PageHeader, sectionTitleClass } from '@/csmju';
+import { ApartmentIcon, cardClass, PageHeader, sectionTitleClass } from '@/components/ui';
 import { groupRoomsByType } from '@/components/features/rooms/group-rooms';
 import { AddRoomButton } from '@/components/features/rooms/RoomAdminTools';
 import { RoomCard } from '@/components/features/rooms/RoomCard';

@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
-import { cardClass, inputClass, primaryButtonClass, StarIcon } from '@/csmju';
+import { cardClass, inputClass, primaryButtonClass, StarIcon } from '@/components/ui';
 import { LoadingButton } from '@/components/shared/LoadingButton';
 import { useToast } from '@/components/shared/Toast';
 import { api, ApiRequestError } from '@/lib/api';

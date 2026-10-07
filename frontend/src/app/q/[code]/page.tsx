@@ -8,7 +8,7 @@ import {
   primaryButtonClass,
   QrCodeIcon,
   secondaryButtonClass,
-} from '@/csmju';
+} from '@/components/ui';
 import { ApiFailure } from '@/components/shared/ApiFailure';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { serverApi } from '@/lib/server-api';

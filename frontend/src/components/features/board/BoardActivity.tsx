@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { CloseIcon, HistoryIcon, iconRoundButtonClass, secondaryButtonClass } from '@/csmju';
+import { CloseIcon, HistoryIcon, iconRoundButtonClass, secondaryButtonClass } from '@/components/ui';
 import { ActivityFeed } from '@/components/features/NotificationList';
 import type { Notification } from '@/lib/types';
 

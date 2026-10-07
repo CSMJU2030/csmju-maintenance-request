@@ -1,0 +1,103 @@
+/*
+ * stylesheet ของระบบแจ้งซ่อม — token และ class กลางมาจาก globals.css ของ template (ห้ามแก้ · ui-design-system.md ข้อ 17.0)
+ * ไฟล์นี้เติมเฉพาะส่วนที่ template ยังไม่มี และอ้างอิง token ของ template เท่านั้น
+ */
+@import './globals.css';
+
+/* ชุดสีกราฟ (ข้อ 3.8) — template ยังไม่มี · ค่าเดียวกับสเปค ใช้ token ที่มีอยู่และสีมาตรฐานของ Tailwind */
+@theme {
+  --color-chart-1: var(--color-primary-container);
+  --color-chart-2: oklch(68.5% 0.169 237.323); /* sky-500 */
+  --color-chart-3: oklch(70.4% 0.14 182.503); /* teal-500 */
+  --color-chart-4: oklch(60.6% 0.25 292.717); /* violet-500 */
+  --color-chart-5: var(--color-brand-amber);
+  --color-chart-6: var(--color-outline);
+}
+
+/* หน้าจอเขียนไว้กับ Tailwind v3 — คงค่าเริ่มต้นเดิมของขอบและเคอร์เซอร์ปุ่ม (คู่มืออัปเกรด v4) */
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-outline-variant, currentColor);
+  }
+
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+
+  /* ช่องกรอกบนมือถือต้อง ≥ 16px ไม่งั้น iOS ซูมหน้าจอ (ข้อ 6.1) */
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primary-container);
+    outline-offset: 2px;
+  }
+}
+
+/* กระดิ่งบน top bar ของ CsmjuAppShell — จุดแดงเมื่อมีรายการที่ยังไม่อ่าน (ข้อ 5.1 · ตั้งโดย ShellBridge) */
+header button[data-unread] {
+  position: relative;
+}
+
+header button[data-unread]::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--color-error);
+  box-shadow: 0 0 0 2px var(--color-surface-container-lowest);
+}
+
+@utility skeleton {
+  background: var(--color-surface-container);
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* ใบงานซ่อม / สติกเกอร์ QR: พิมพ์เฉพาะเนื้อหา — ซ่อน sidebar/top bar/footer ของ CsmjuAppShell (CSS นอก layer ชนะ utility) */
+@media print {
+  body {
+    background: var(--color-surface-container-lowest);
+  }
+
+  aside.brand-gradient,
+  #main > header,
+  #main > footer {
+    display: none;
+  }
+
+  #main {
+    margin-left: 0;
+  }
+
+  .print-sheet {
+    box-shadow: none;
+    border: 0;
+  }
+
+  @page {
+    margin: 12mm;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation-duration: 1ms;
+  }
+}
