@@ -121,3 +121,42 @@ describe('RoomsService room photos', () => {
     await expect(service.removeRoomPhoto(ROOM_ID)).rejects.toMatchObject({ code: 'NOT_FOUND' });
   });
 });
+
+describe('RoomsService.remove', () => {
+  it('deletes the room with its equipment and every photo, leaving repair requests to the database (SetNull)', async () => {
+    const files = fakeStoredFiles();
+    const storage = new ImageStorage({ storedFile: files.storedFile } as unknown as PrismaService);
+    const [roomPhoto, pcPhoto] = await storage.save([photo(JPEG), photo(PNG, 'pc.png')]);
+    const deleteMany = jest.fn().mockReturnValue('delete-equipment');
+    const deleteRoom = jest.fn().mockReturnValue('delete-room');
+    const $transaction = jest.fn().mockResolvedValue([]);
+    const prisma = {
+      room: {
+        findUnique: jest.fn().mockResolvedValue({
+          photoFilename: roomPhoto.filename,
+          equipment: [{ photoFilename: pcPhoto.filename }, { photoFilename: null }],
+        }),
+        delete: deleteRoom,
+      },
+      equipment: { deleteMany },
+      $transaction,
+    };
+    const service = new RoomsService(prisma as unknown as PrismaService, {} as BuildingsDirectory, storage);
+
+    await expect(service.remove(ROOM_ID)).resolves.toEqual({ id: ROOM_ID, deleted: true });
+    expect(deleteMany).toHaveBeenCalledWith({ where: { roomId: ROOM_ID } });
+    expect(deleteRoom).toHaveBeenCalledWith({ where: { id: ROOM_ID } });
+    expect($transaction).toHaveBeenCalledWith(['delete-equipment', 'delete-room']);
+    expect([...files.rows.keys()]).toEqual([]);
+  });
+
+  it('404s when the room is already gone', async () => {
+    const prisma = { room: { findUnique: jest.fn().mockResolvedValue(null) } };
+    const service = new RoomsService(
+      prisma as unknown as PrismaService,
+      {} as BuildingsDirectory,
+      {} as ImageStorage,
+    );
+    await expect(service.remove(ROOM_ID)).rejects.toMatchObject({ code: 'NOT_FOUND' });
+  });
+});

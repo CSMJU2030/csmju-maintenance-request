@@ -65,7 +65,8 @@ export function RoomSections({
           allIds={sections.flatMap((section) => section.rooms.map((room) => room.id))}
           noun="ห้อง"
           endpoint="/api/v1/rooms"
-          deleteConsequence="ลบได้เฉพาะห้องที่ยังไม่มีอุปกรณ์และใบแจ้งซ่อม ห้องอื่นให้ปิดใช้งานแทน"
+          deleteConsequence="อุปกรณ์ในห้องเหล่านี้จะถูกลบไปด้วย · ใบแจ้งซ่อมเดิมยังอยู่เป็นประวัติแต่ไม่ผูกกับห้องแล้ว · สติกเกอร์ QR ใช้ไม่ได้อีก"
+          typeToConfirm
         />
         {content}
       </div>

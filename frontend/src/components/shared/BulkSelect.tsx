@@ -11,6 +11,7 @@ import {
   secondaryButtonClass,
   tonalButtonClass,
 } from '@/components/ui';
+import { TypeToConfirmModal } from '@/components/shared/TypeToConfirmModal';
 import { useToast } from '@/components/shared/Toast';
 import { api, ApiRequestError } from '@/lib/api';
 import { formatNumber } from '@/lib/format';
@@ -149,6 +150,7 @@ export function BulkToolbar({
   noun,
   endpoint,
   deleteConsequence,
+  typeToConfirm = false,
 }: {
   allIds: string[];
   /** เช่น "อุปกรณ์" "ห้อง" "ประเภท" */
@@ -156,12 +158,14 @@ export function BulkToolbar({
   /** path ของรายการ เช่น /api/v1/equipment (ต่อด้วย /:id) — เป็น string เพราะส่งมาจาก server component */
   endpoint: string;
   deleteConsequence?: string;
+  /** ลบแล้วกระทบข้อมูลอื่นด้วย (เช่น ห้องพร้อมเครื่องในห้อง) — ยืนยันชั้นที่สองด้วยการพิมพ์จำนวนที่จะลบ */
+  typeToConfirm?: boolean;
 }) {
   const { selecting, selected, start, stop, setMany } = useBulk();
   const router = useRouter();
   const toast = useToast();
   const [busy, setBusy] = useState<Action | null>(null);
-  const [confirming, setConfirming] = useState(false);
+  const [confirming, setConfirming] = useState<'warn' | 'type' | null>(null);
   const ids = allIds.filter((id) => selected.has(id));
   const count = ids.length;
   const allSelected = count > 0 && count === allIds.length;
@@ -190,7 +194,7 @@ export function BulkToolbar({
       );
     }
     setBusy(null);
-    setConfirming(false);
+    setConfirming(null);
     stop();
     router.refresh();
   };
@@ -241,7 +245,7 @@ export function BulkToolbar({
       <button
         type="button"
         disabled={disabled}
-        onClick={() => setConfirming(true)}
+        onClick={() => setConfirming('warn')}
         className={`${secondaryButtonClass} text-error hover:bg-error-container`}
       >
         <DeleteIcon className="h-4 w-4" />
@@ -251,15 +255,27 @@ export function BulkToolbar({
         เสร็จ
       </button>
       <ConfirmDeleteModal
-        open={confirming}
-        title={`ลบ${noun}ที่เลือก`}
+        open={confirming === 'warn'}
+        title={`ลบ${noun}ที่เลือก${typeToConfirm ? ' (ขั้นที่ 1 จาก 2)' : ''}`}
         itemName={`${noun} ${formatNumber(count)} รายการ`}
         consequence={deleteConsequence}
-        confirmLabel={`ลบ ${formatNumber(count)} รายการ`}
+        confirmLabel={typeToConfirm ? 'ต่อไป' : `ลบ ${formatNumber(count)} รายการ`}
         loading={busy === 'delete'}
-        onConfirm={() => void run('delete')}
-        onClose={() => setConfirming(false)}
+        onConfirm={() => (typeToConfirm ? setConfirming('type') : void run('delete'))}
+        onClose={() => setConfirming(null)}
       />
+      {typeToConfirm ? (
+        <TypeToConfirmModal
+          open={confirming === 'type'}
+          title={`ลบ${noun}ที่เลือก (ขั้นที่ 2 จาก 2)`}
+          phrase={String(count)}
+          description={`ลบ${noun} ${formatNumber(count)} รายการถาวร ย้อนกลับไม่ได้ — พิมพ์จำนวนที่จะลบให้ตรง`}
+          confirmLabel={`ลบ ${formatNumber(count)} รายการถาวร`}
+          loading={busy === 'delete'}
+          onConfirm={() => void run('delete')}
+          onClose={() => setConfirming(null)}
+        />
+      ) : null}
     </div>
   );
 }

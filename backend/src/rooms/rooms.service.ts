@@ -265,19 +265,23 @@ export class RoomsService {
     return this.get(id, token);
   }
 
-  /** ลบได้เฉพาะห้องที่ไม่มีเครื่องและไม่มีใบแจ้งซ่อม — ที่ใช้แล้วให้ปิดการใช้งานแทน */
+  /**
+   * ลบห้องพร้อมเครื่องทุกเครื่องในห้องและรูปของห้อง/เครื่อง (หน้าเว็บยืนยันสองชั้นก่อนเรียก)
+   * ใบแจ้งซ่อมเดิมไม่ถูกลบ — room_id / equipment_id กลายเป็น null (onDelete: SetNull)
+   * และยังมีชื่อสถานที่/เครื่องเป็นข้อความเก็บไว้เป็นประวัติ
+   */
   async remove(id: string) {
     const room = await this.prisma.room.findUnique({
       where: { id },
-      include: { _count: { select: { equipment: true, requests: true } } },
+      select: { photoFilename: true, equipment: { select: { photoFilename: true } } },
     });
     if (!room) throw notFound('ไม่พบห้องนี้ อาจถูกลบไปแล้ว');
-    if (room._count.equipment > 0 || room._count.requests > 0) {
-      throw conflict(
-        `ห้องนี้มีเครื่อง ${room._count.equipment} เครื่อง และใบแจ้งซ่อม ${room._count.requests} ใบ ให้ปิดการใช้งานแทนการลบ`,
-      );
-    }
-    await this.prisma.room.delete({ where: { id } });
+    await this.prisma.$transaction([
+      this.prisma.equipment.deleteMany({ where: { roomId: id } }),
+      this.prisma.room.delete({ where: { id } }),
+    ]);
+    const photos = [room.photoFilename, ...room.equipment.map((item) => item.photoFilename)];
+    await this.storage.remove(photos.filter((key): key is string => Boolean(key)));
     return { id, deleted: true as const };
   }
 
@@ -383,6 +387,7 @@ export class RoomsService {
       throw conflict(`เครื่องนี้มีประวัติแจ้งซ่อม ${row._count.requests} ใบ ให้ปิดการใช้งานแทนการลบ`);
     }
     await this.prisma.equipment.delete({ where: { id } });
+    if (row.photoFilename) await this.storage.remove([row.photoFilename]);
     return { id, deleted: true as const };
   }
 

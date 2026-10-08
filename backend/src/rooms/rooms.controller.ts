@@ -109,9 +109,11 @@ export class RoomsController {
 
   @Delete('rooms/:id')
   @RequirePermissions(Permission.ROOM_MANAGE)
-  @ApiOperation({ summary: 'ลบห้องที่ยังไม่มีเครื่องและใบแจ้งซ่อม' })
+  @ApiOperation({
+    summary: 'ลบห้องพร้อมเครื่องในห้อง — ใบแจ้งซ่อมเดิมยังอยู่เป็นประวัติ (ไม่ผูกห้อง/เครื่องแล้ว)',
+  })
   @ApiEnvelope(DeletedDto)
-  @ApiErrors(400, 403, 404, 409)
+  @ApiErrors(400, 403, 404)
   remove(@Param('id', UuidParam) id: string) {
     return this.rooms.remove(id);
   }

@@ -1596,16 +1596,6 @@
                 }
               }
             }
-          },
-          "409": {
-            "description": "CONFLICT — ชนกฎธุรกิจ",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorEnvelopeDto"
-                }
-              }
-            }
           }
         },
         "security": [
@@ -1613,7 +1603,7 @@
             "bearer": []
           }
         ],
-        "summary": "ลบห้องที่ยังไม่มีเครื่องและใบแจ้งซ่อม",
+        "summary": "ลบห้องพร้อมเครื่องในห้อง — ใบแจ้งซ่อมเดิมยังอยู่เป็นประวัติ (ไม่ผูกห้อง/เครื่องแล้ว)",
         "tags": [
           "rooms"
         ]
