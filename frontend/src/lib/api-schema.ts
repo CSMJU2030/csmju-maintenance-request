@@ -267,7 +267,7 @@ export interface paths {
     get: operations['Rooms_get'];
     put?: never;
     post?: never;
-    /** ลบห้องที่ยังไม่มีเครื่องและใบแจ้งซ่อม */
+    /** ลบห้องพร้อมเครื่องในห้อง — ใบแจ้งซ่อมเดิมยังอยู่เป็นประวัติ (ไม่ผูกห้อง/เครื่องแล้ว) */
     delete: operations['Rooms_remove'];
     options?: never;
     head?: never;
@@ -2596,15 +2596,6 @@ export interface operations {
       };
       /** @description NOT_FOUND */
       404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['ErrorEnvelopeDto'];
-        };
-      };
-      /** @description CONFLICT — ชนกฎธุรกิจ */
-      409: {
         headers: {
           [name: string]: unknown;
         };

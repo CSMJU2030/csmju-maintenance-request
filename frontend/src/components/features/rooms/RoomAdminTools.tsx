@@ -15,6 +15,7 @@ import {
   secondaryButtonClass,
 } from '@/components/ui';
 import { LoadingButton } from '@/components/shared/LoadingButton';
+import { TypeToConfirmModal } from '@/components/shared/TypeToConfirmModal';
 import { useToast } from '@/components/shared/Toast';
 import { api } from '@/lib/api';
 import type { RoomDetail } from '@/lib/types';
@@ -77,7 +78,7 @@ export function AddEquipmentButton({
 
 /**
  * เครื่องมือผู้ดูแลระบบบนหน้าห้อง: เพิ่มอุปกรณ์ · แก้ไขห้อง · รูปห้อง · พิมพ์ QR · เปิด/ปิดใช้งาน · ลบ
- * ห้องที่มีเครื่องหรือใบแจ้งซ่อมลบไม่ได้ (backend ตอบ 409) — บอกเหตุผลก่อนกด และแนะนำให้ปิดใช้งานแทน
+ * ลบห้อง = ยืนยันสองชั้น: (1) บอกว่าเครื่องในห้องจะถูกลบด้วยและใบแจ้งซ่อมยังอยู่เป็นประวัติ (2) พิมพ์รหัสห้อง
  */
 export function RoomAdminTools({
   room,
@@ -102,7 +103,7 @@ export function RoomAdminTools({
   const router = useRouter();
   const toast = useToast();
   const [editing, setEditing] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+  const [deleteStep, setDeleteStep] = useState<'warn' | 'type' | null>(null);
   const [busy, setBusy] = useState<'toggle' | 'delete' | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -132,12 +133,15 @@ export function RoomAdminTools({
     }
   };
 
-  const blocked =
-    room.equipmentCount > 0 || room.openRequestCount > 0
-      ? `ห้องนี้มีเครื่อง ${room.equipmentCount} เครื่อง${
-          room.openRequestCount > 0 ? ` และใบแจ้งซ่อมที่ยังไม่ปิด ${room.openRequestCount} ใบ` : ''
-        } จึงลบไม่ได้ ให้ปิดการใช้งานแทน`
-      : null;
+  const consequence = [
+    room.equipmentCount > 0 ? `อุปกรณ์ในห้อง ${room.equipmentCount} ชิ้นจะถูกลบไปด้วย` : null,
+    room.openRequestCount > 0
+      ? `ใบแจ้งซ่อมที่ยังไม่ปิด ${room.openRequestCount} ใบจะยังอยู่ แต่ไม่ผูกกับห้องนี้แล้ว`
+      : 'ใบแจ้งซ่อมเดิมยังอยู่เป็นประวัติ',
+    'สติกเกอร์ QR ของห้องและเครื่องในห้องจะใช้ไม่ได้อีก',
+  ]
+    .filter(Boolean)
+    .join(' · ');
 
   return (
     <div className="flex flex-wrap items-center gap-2" role="group" aria-label="จัดการห้อง (ผู้ดูแลระบบ)">
@@ -170,7 +174,7 @@ export function RoomAdminTools({
       </LoadingButton>
       <button
         type="button"
-        onClick={() => (setError(null), setDeleting(true))}
+        onClick={() => (setError(null), setDeleteStep('warn'))}
         className={`${secondaryButtonClass} hover:text-error`}
       >
         <DeleteIcon className="h-4 w-4" />
@@ -184,16 +188,29 @@ export function RoomAdminTools({
         room={room}
       />
       <ConfirmDeleteModal
-        open={deleting}
-        title="ลบห้อง"
+        open={deleteStep === 'warn'}
+        title="ลบห้อง (ขั้นที่ 1 จาก 2)"
         itemName={`${room.code} ${room.name}`}
-        consequence="สติกเกอร์ QR ของห้องนี้จะใช้ไม่ได้อีก"
-        blockedReason={blocked}
-        confirmLabel="ลบห้อง"
+        consequence={consequence}
+        confirmLabel="ต่อไป"
+        onConfirm={() => setDeleteStep('type')}
+        onClose={() => setDeleteStep(null)}
+      />
+      <TypeToConfirmModal
+        open={deleteStep === 'type'}
+        title="ลบห้อง (ขั้นที่ 2 จาก 2)"
+        phrase={room.code}
+        description={
+          <>
+            ลบห้อง <strong className="text-on-surface">{room.code}</strong> ถาวร ย้อนกลับไม่ได้ —
+            ถ้าแค่ไม่ใช้ห้องนี้ชั่วคราว ให้กด “ปิดใช้งาน” แทน
+          </>
+        }
+        confirmLabel="ลบห้องถาวร"
         loading={busy === 'delete'}
         error={error}
         onConfirm={() => void remove()}
-        onClose={() => setDeleting(false)}
+        onClose={() => setDeleteStep(null)}
       />
     </div>
   );
