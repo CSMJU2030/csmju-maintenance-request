@@ -5,6 +5,7 @@ import {
   AssignmentIcon,
   BoardIcon,
   BuildIcon,
+  ChatIcon,
   cardClass,
   cardHeaderClass,
   CategoryIcon,
@@ -148,6 +149,12 @@ export default async function HomePage() {
               user.subsystemRole !== 'USER' ? ` · ${SUBSYSTEM_ROLE_LABEL[user.subsystemRole]}` : ''
             }`}
           />
+        }
+        actions={
+          <Link href="/faq" className={`${primaryButtonClass} gap-2`}>
+            <ChatIcon className="h-4 w-4" />
+            คำถามที่พบบ่อย
+          </Link>
         }
       />
 
