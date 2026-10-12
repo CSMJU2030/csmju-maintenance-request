@@ -97,13 +97,13 @@ export class FaqService {
       items: FAQS.map(({ id, question, answer }) => ({ id, question, answer })),
       assistantAvailable: Boolean(
         this.config.get('faqAssistant.apiKey', { infer: true }) &&
-          this.config.get('faqAssistant.responsesUrl', { infer: true }),
+        this.config.get('faqAssistant.responsesUrl', { infer: true }),
       ),
     };
   }
 
-  async ask(question: string, userId: string): Promise<FaqAnswerDto> {
-    this.enforceQuestionLimit(userId);
+  async ask(question: string, coreUserId: string): Promise<FaqAnswerDto> {
+    this.enforceQuestionLimit(coreUserId);
     const relatedFaqs = this.findRelatedFaqs(question);
     const relatedFaqIds = relatedFaqs.map((faq) => faq.id);
     const answer = await this.generateAnswer(question);
@@ -119,9 +119,9 @@ export class FaqService {
     };
   }
 
-  private enforceQuestionLimit(userId: string): void {
+  private enforceQuestionLimit(coreUserId: string): void {
     const now = Date.now();
-    const recent = (this.questionTimes.get(userId) ?? []).filter((time) => now - time < 60_000);
+    const recent = (this.questionTimes.get(coreUserId) ?? []).filter((time) => now - time < 60_000);
     if (recent.length >= 10) {
       const retryAfterSec = Math.max(1, Math.ceil(60 - (now - recent[0]) / 1000));
       throw new ApiError(
@@ -132,7 +132,7 @@ export class FaqService {
       );
     }
     recent.push(now);
-    this.questionTimes.set(userId, recent);
+    this.questionTimes.set(coreUserId, recent);
 
     if (this.questionTimes.size > 1000) {
       for (const [id, times] of this.questionTimes) {

@@ -28,7 +28,14 @@ const SUGGESTED_QUESTIONS = [
 
 function HelpCircleIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      aria-hidden="true"
+    >
       <circle cx="12" cy="12" r="9" />
       <path d="M9.6 9a2.5 2.5 0 0 1 4.8 1c0 1.7-2.4 2.1-2.4 3.7M12 17.2h.01" />
     </svg>
@@ -78,11 +85,7 @@ export function FaqAssistant({
         },
       ]);
     } catch (cause) {
-      setError(
-        cause instanceof ApiRequestError
-          ? cause.message
-          : 'ส่งคำถามไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',
-      );
+      setError(cause instanceof ApiRequestError ? cause.message : 'ส่งคำถามไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
     } finally {
       setPending(false);
     }
@@ -162,7 +165,10 @@ export function FaqAssistant({
               </p>
             ) : null}
             {error ? (
-              <p className="rounded-lg bg-error-container px-4 py-3 text-body-md text-on-error-container" role="alert">
+              <p
+                className="rounded-lg bg-error-container px-4 py-3 text-body-md text-on-error-container"
+                role="alert"
+              >
                 {error}
               </p>
             ) : null}
@@ -204,7 +210,8 @@ export function FaqAssistant({
             </button>
           </form>
           <p className="mt-3 text-caption text-on-surface-variant">
-            ข้อความคำถามอาจถูกส่งให้ผู้ให้บริการ AI ตามการตั้งค่าของระบบ กรุณาอย่าใส่ชื่อ เลขประจำตัว เบอร์โทร หรือข้อมูลส่วนบุคคล
+            ข้อความคำถามอาจถูกส่งให้ผู้ให้บริการ AI ตามการตั้งค่าของระบบ กรุณาอย่าใส่ชื่อ เลขประจำตัว เบอร์โทร
+            หรือข้อมูลส่วนบุคคล
           </p>
         </div>
       </section>
@@ -212,8 +219,12 @@ export function FaqAssistant({
       <section className={cardClass} aria-labelledby="faq-list-title">
         <div className={cardHeaderClass}>
           <div>
-            <h2 id="faq-list-title" className="font-display text-headline-md text-on-surface">คำถามที่พบบ่อย</h2>
-            <p className="mt-1 text-body-md text-on-surface-variant">เลือกหัวข้อเพื่ออ่านคำแนะนำเกี่ยวกับระบบ</p>
+            <h2 id="faq-list-title" className="font-display text-headline-md text-on-surface">
+              คำถามที่พบบ่อย
+            </h2>
+            <p className="mt-1 text-body-md text-on-surface-variant">
+              เลือกหัวข้อเพื่ออ่านคำแนะนำเกี่ยวกับระบบ
+            </p>
           </div>
           <label className="w-full sm:max-w-xs">
             <span className="sr-only">ค้นหาคำถามที่พบบ่อย</span>
@@ -245,7 +256,9 @@ export function FaqAssistant({
             ))}
           </div>
         ) : (
-          <p className="px-6 py-10 text-center text-body-md text-on-surface-variant">ไม่พบคำถามที่ตรงกับคำค้น</p>
+          <p className="px-6 py-10 text-center text-body-md text-on-surface-variant">
+            ไม่พบคำถามที่ตรงกับคำค้น
+          </p>
         )}
       </section>
     </div>
