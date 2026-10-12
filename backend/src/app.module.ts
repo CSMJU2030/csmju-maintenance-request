@@ -12,6 +12,7 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
 import configuration from './config/configuration';
 import { validateEnv } from './config/env.validation';
 import { DirectoryModule } from './directory/directory.module';
+import { FaqModule } from './faq/faq.module';
 import { HealthModule } from './health/health.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -32,6 +33,7 @@ import { StatisticsModule } from './statistics/statistics.module';
     PrismaModule,
     AuthModule,
     DirectoryModule,
+    FaqModule,
     HealthModule,
     ProfilesModule,
     BuildingsModule,

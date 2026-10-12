@@ -4,6 +4,38 @@
  */
 
 export interface paths {
+  '/api/v1/faq': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['Faq_getIndex'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/faq/ask': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['Faq_ask'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/me': {
     parameters: {
       query?: never;
@@ -665,6 +697,36 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    FaqItemDto: {
+      /** @example report-repair */
+      id: string;
+      /** @example แจ้งซ่อมได้อย่างไร? */
+      question: string;
+      /** @example เลือกเมนู “แจ้งซ่อม” แล้วระบุสถานที่และอาการที่พบ */
+      answer: string;
+    };
+    FaqIndexDto: {
+      items: components['schemas']['FaqItemDto'][];
+      /** @description มีการตั้งค่า AI provider สำหรับตอบคำถามหรือไม่ */
+      assistantAvailable: boolean;
+    };
+    AskFaqDto: {
+      /**
+       * @example แจ้งซ่อมแล้วติดตามสถานะตรงไหน?
+       */
+      question: string;
+    };
+    FaqAnswerDto: {
+      /** @description คำตอบภาษาไทยจาก AI หรือจากการค้น FAQ ในเครื่อง */
+      answer: string;
+      /**
+       * @description แหล่งที่ใช้สร้างคำตอบ
+       * @enum {string}
+       */
+      mode: 'ai' | 'faq';
+      /** @description รหัส FAQ ที่เกี่ยวข้องกับคำถาม */
+      relatedFaqIds: string[];
+    };
     /** @enum {string} */
     ErrorCode:
       | 'BAD_REQUEST'
@@ -1666,6 +1728,110 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+  Faq_getIndex: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {boolean} */
+            success: true;
+            data: components['schemas']['FaqIndexDto'];
+          };
+        };
+      };
+      /** @description UNAUTHORIZED — ไม่มี token หรือ token ใช้ไม่ได้ */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorEnvelopeDto'];
+        };
+      };
+      /** @description FORBIDDEN — สิทธิ์ไม่พอ */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorEnvelopeDto'];
+        };
+      };
+    };
+  };
+  Faq_ask: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AskFaqDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {boolean} */
+            success: true;
+            data: components['schemas']['FaqAnswerDto'];
+          };
+        };
+      };
+      /** @description BAD_REQUEST / VALIDATION_ERROR */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorEnvelopeDto'];
+        };
+      };
+      /** @description UNAUTHORIZED — ไม่มี token หรือ token ใช้ไม่ได้ */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorEnvelopeDto'];
+        };
+      };
+      /** @description FORBIDDEN — สิทธิ์ไม่พอ */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorEnvelopeDto'];
+        };
+      };
+      /** @description TOO_MANY_REQUESTS — ส่งคำขอถี่เกินไป (มี header Retry-After) */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorEnvelopeDto'];
+        };
+      };
+    };
+  };
   Me_me: {
     parameters: {
       query?: never;

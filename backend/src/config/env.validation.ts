@@ -22,5 +22,22 @@ export function validateEnv(config: Record<string, unknown>): Record<string, unk
     throw new Error('CORE_HUB_JWKS_URL must use HTTPS in production (spec §41.14)');
   }
 
+  const aiApiKey = String(config.FAQ_AI_API_KEY ?? '').trim();
+  const aiResponsesUrl = String(config.FAQ_AI_RESPONSES_URL ?? '').trim();
+  if (aiApiKey && !aiResponsesUrl) {
+    throw new Error('FAQ_AI_RESPONSES_URL is required when FAQ_AI_API_KEY is configured');
+  }
+  if (aiResponsesUrl) {
+    let parsed: URL;
+    try {
+      parsed = new URL(aiResponsesUrl);
+    } catch {
+      throw new Error('FAQ_AI_RESPONSES_URL must be a valid absolute URL');
+    }
+    if (isProduction && parsed.protocol !== 'https:') {
+      throw new Error('FAQ_AI_RESPONSES_URL must use HTTPS in production');
+    }
+  }
+
   return config;
 }

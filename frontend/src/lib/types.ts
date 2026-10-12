@@ -43,3 +43,6 @@ export type EquipmentInventoryItem = Schemas['EquipmentInventoryDto'];
 export type InventoryRoomRef = Schemas['InventoryRoomRefDto'];
 export type RoomStatistics = Schemas['RoomStatDto'];
 export type TopEquipment = Schemas['TopEquipmentDto'];
+export type FaqItem = Schemas['FaqItemDto'];
+export type FaqIndex = Schemas['FaqIndexDto'];
+export type FaqAnswer = Schemas['FaqAnswerDto'];
