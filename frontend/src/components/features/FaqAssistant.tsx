@@ -14,8 +14,14 @@ type Message = {
   relatedFaqIds?: string[];
 };
 
-const FAQ_CATEGORIES = [
-  { id: 'all', label: 'ภาพรวม', faqIds: undefined },
+type FaqCategory = {
+  id: 'all' | 'request' | 'tracking' | 'account';
+  label: string;
+  faqIds?: readonly string[];
+};
+
+const FAQ_CATEGORIES: readonly FaqCategory[] = [
+  { id: 'all', label: 'ภาพรวม' },
   { id: 'request', label: 'การแจ้งซ่อม', faqIds: ['report-repair', 'duplicate-request', 'scan-qr'] },
   {
     id: 'tracking',
@@ -25,7 +31,7 @@ const FAQ_CATEGORIES = [
   { id: 'account', label: 'บัญชีและการเข้าใช้', faqIds: ['sign-in'] },
 ] as const;
 
-type FaqCategoryId = (typeof FAQ_CATEGORIES)[number]['id'];
+type FaqCategoryId = FaqCategory['id'];
 
 export function FaqAssistant({
   items,
