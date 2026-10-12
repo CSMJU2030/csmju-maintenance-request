@@ -64,6 +64,9 @@ services:
       CORE_HUB_ISSUER: ${CORE_HUB_ISSUER:-core-hub}
       CORE_HUB_AUDIENCE: ${CORE_HUB_AUDIENCE:-csmju2030}
       SUBSYSTEM_ID: ${SUBSYSTEM_ID:-csmju-maintenance-request}
+      FAQ_AI_API_KEY: ${FAQ_AI_API_KEY:-}
+      FAQ_AI_RESPONSES_URL: ${FAQ_AI_RESPONSES_URL:-https://api.openai.com/v1/responses}
+      FAQ_AI_MODEL: ${FAQ_AI_MODEL:-gpt-5-mini}
       SUBSYSTEM_NAME: ${SUBSYSTEM_NAME:-ระบบแจ้งซ่อม}
       # emails of Core Hub staff/lecturer accounts that administer this system (comma separated)
       ADMIN_ACCOUNTS: ${ADMIN_ACCOUNTS:-csmju-maintenance-request.admin@csmju2030.ac.th}

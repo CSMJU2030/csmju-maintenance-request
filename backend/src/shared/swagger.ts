@@ -90,11 +90,12 @@ const ERROR_DESCRIPTIONS: Record<number, string> = {
   403: 'FORBIDDEN — สิทธิ์ไม่พอ',
   404: 'NOT_FOUND',
   409: 'CONFLICT — ชนกฎธุรกิจ',
+  429: 'TOO_MANY_REQUESTS — ส่งคำขอถี่เกินไป (มี header Retry-After)',
   503: 'SERVICE_UNAVAILABLE — ติดต่อ Core Hub ไม่ได้ชั่วคราว (มี header Retry-After)',
 };
 
 /** error envelope ของ status ที่ endpoint นั้นตอบได้ (401 ใส่ให้ทุก endpoint ที่ต้องมี token) */
-export function ApiErrors(...statuses: (400 | 403 | 404 | 409 | 503)[]) {
+export function ApiErrors(...statuses: (400 | 403 | 404 | 409 | 429 | 503)[]) {
   return applyDecorators(
     ApiExtraModels(ErrorEnvelopeDto),
     ...[401, ...statuses].map((status) =>

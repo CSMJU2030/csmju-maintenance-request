@@ -39,6 +39,7 @@ export enum Permission {
   PROFILE_UPDATE_ANY = 'profile:update:any',
   NOTIFICATION_READ_OWN = 'notification:read:own',
   NOTIFICATION_UPDATE_OWN = 'notification:update:own',
+  FAQ_ASK = 'faq:ask',
 }
 
 const P = Permission;
@@ -56,6 +57,7 @@ const USER_PERMISSIONS: Permission[] = [
   P.PROFILE_UPDATE_OWN,
   P.NOTIFICATION_READ_OWN,
   P.NOTIFICATION_UPDATE_OWN,
+  P.FAQ_ASK,
 ];
 
 /** ช่างซ่อมบำรุง — ยังแจ้งซ่อมได้ + เห็นคิวงานทั้งหมด รับงาน และอัปเดตงานที่ตัวเองรับผิดชอบ */
@@ -87,6 +89,7 @@ const ADMIN_PERMISSIONS: Permission[] = [
   P.PROFILE_UPDATE_ANY,
   P.NOTIFICATION_READ_OWN,
   P.NOTIFICATION_UPDATE_OWN,
+  P.FAQ_ASK,
 ];
 
 export const ROLE_PERMISSIONS: Readonly<Record<SubsystemRole, readonly Permission[]>> = Object.freeze({

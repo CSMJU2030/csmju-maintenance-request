@@ -53,6 +53,7 @@ function navFor(user: Me): NavItem[] {
   items.push(
     { label: 'อาคารและห้อง', labelEn: 'Rooms', href: '/buildings', icon: 'meeting-room' },
     { label: 'ประเภทอุปกรณ์', labelEn: 'Equipment', href: '/equipment', icon: 'menu-book' },
+    { label: 'คำถามที่พบบ่อย', labelEn: 'FAQ & AI', href: '/faq', icon: 'menu-book' },
   );
   // บอร์ดงานรวมคิวงานและความเคลื่อนไหวล่าสุดไว้หน้าเดียว
   if (can(user, P.JOB_ACCEPT))

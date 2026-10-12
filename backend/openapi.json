@@ -1,6 +1,86 @@
 {
   "openapi": "3.0.0",
   "paths": {
+    "/api/v1/faq": {
+      "get": {
+        "operationId": "Faq_getIndex",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data"],
+                  "properties": {
+                    "success": { "type": "boolean", "enum": [true] },
+                    "data": { "$ref": "#/components/schemas/FaqIndexDto" }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED — ไม่มี token หรือ token ใช้ไม่ได้",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelopeDto" } } }
+          },
+          "403": {
+            "description": "FORBIDDEN — สิทธิ์ไม่พอ",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelopeDto" } } }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "คำถามที่พบบ่อยและสถานะผู้ช่วย AI",
+        "tags": ["faq"]
+      }
+    },
+    "/api/v1/faq/ask": {
+      "post": {
+        "operationId": "Faq_ask",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AskFaqDto" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data"],
+                  "properties": {
+                    "success": { "type": "boolean", "enum": [true] },
+                    "data": { "$ref": "#/components/schemas/FaqAnswerDto" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BAD_REQUEST / VALIDATION_ERROR",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelopeDto" } } }
+          },
+          "401": {
+            "description": "UNAUTHORIZED — ไม่มี token หรือ token ใช้ไม่ได้",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelopeDto" } } }
+          },
+          "403": {
+            "description": "FORBIDDEN — สิทธิ์ไม่พอ",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelopeDto" } } }
+          },
+          "429": {
+            "description": "TOO_MANY_REQUESTS — ส่งคำขอถี่เกินไป (มี header Retry-After)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelopeDto" } } }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "ถามผู้ช่วย FAQ จากข้อมูลของระบบแจ้งซ่อม",
+        "tags": ["faq"]
+      }
+    },
     "/api/v1/me": {
       "get": {
         "operationId": "Me_me",
@@ -5363,6 +5443,44 @@
       }
     },
     "schemas": {
+      "FaqItemDto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "example": "report-repair" },
+          "question": { "type": "string", "example": "แจ้งซ่อมได้อย่างไร?" },
+          "answer": { "type": "string", "example": "เลือกเมนู “แจ้งซ่อม” แล้วระบุสถานที่และอาการที่พบ" }
+        },
+        "required": ["id", "question", "answer"]
+      },
+      "FaqIndexDto": {
+        "type": "object",
+        "properties": {
+          "items": { "type": "array", "items": { "$ref": "#/components/schemas/FaqItemDto" } },
+          "assistantAvailable": { "type": "boolean", "description": "มีการตั้งค่า AI provider สำหรับตอบคำถามหรือไม่" }
+        },
+        "required": ["items", "assistantAvailable"]
+      },
+      "AskFaqDto": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 1200,
+            "example": "แจ้งซ่อมแล้วติดตามสถานะตรงไหน?"
+          }
+        },
+        "required": ["question"]
+      },
+      "FaqAnswerDto": {
+        "type": "object",
+        "properties": {
+          "answer": { "type": "string", "description": "คำตอบภาษาไทยจาก AI หรือจากการค้น FAQ ในเครื่อง" },
+          "mode": { "type": "string", "enum": ["ai", "faq"], "description": "แหล่งที่ใช้สร้างคำตอบ" },
+          "relatedFaqIds": { "type": "array", "items": { "type": "string" }, "description": "รหัส FAQ ที่เกี่ยวข้องกับคำถาม" }
+        },
+        "required": ["answer", "mode", "relatedFaqIds"]
+      },
       "ErrorCode": {
         "type": "string",
         "enum": [

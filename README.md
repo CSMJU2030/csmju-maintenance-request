@@ -14,6 +14,8 @@
 | ช่าง (`TECHNICIAN`) | คิวงาน (รอรับ / งานของฉัน / ใกล้และเกินกำหนด) · **บอร์ดงานแบบลากวาง** (`/board` — ลากการ์ดเพื่อรับงาน เริ่ม พัก ปิดงาน) · เห็นจำนวนคนที่เดือดร้อนจากเรื่องเดียวกัน · รับงาน · เริ่ม / พักรออะไหล่ / ปิดงานพร้อมรูปหลังซ่อม · ปรับความเร่งด่วนหรือหมวดหมู่ · พิมพ์ใบงาน · ส่งออก CSV |
 | ผู้ดูแลระบบ (`ADMIN`) | ทุกอย่างของช่าง + มอบหมาย/โอนงาน · แต่งตั้งบุคลากรเป็นช่าง · จัดการหมวดหมู่และสติกเกอร์ QR (พิมพ์เป็นแผ่น) · ดูอาคารจากข้อมูลกลาง · สถิติ SLA ความพึงพอใจ จุดเสียซ้ำ ภาระงานช่าง |
 
+ผู้ใช้ทุกบทบาทค้นคำถามที่พบบ่อยหรือถามผู้ช่วย AI ได้ที่ `/faq` (หากยังไม่ตั้งค่า AI จะค้นคำตอบจาก FAQ ในระบบ)
+
 SLA ตามความเร่งด่วน: ด่วนมาก 4 ชม. · ด่วน 24 ชม. · ปกติ 72 ชม. · ไม่เร่งด่วน 7 วัน
 ค้นหาด่วนได้ทุกหน้าด้วย `Ctrl K`
 
@@ -28,6 +30,7 @@ backend/    NestJS 11 + Prisma 7 (PostgreSQL ของระบบนี้เ�
   src/auth            ตรวจ token ของ Core Hub 10 ขั้น (RS256 + JWKS) · /auth/login · /auth/callback · /auth/logout · /api/v1/me
   src/core-hub        เรียกข้อมูลกลางด้วย token ของผู้ใช้: /people/me · /people/:code · /buildings (cache 10 นาที)
   src/repair-requests ใบแจ้งซ่อม: workflow, SLA, รูป, ประวัติ, ความคิดเห็น, คะแนน
+  src/faq             คำถามที่พบบ่อยและผู้ช่วย AI ซึ่งอิงข้อมูล FAQ พร้อมคำตอบสำรองจาก FAQ
   src/rooms           ห้อง + เครื่องในห้อง (แอดมินเพิ่มเอง) · QR ต่อห้อง/ต่อเครื่อง · สถานะเครื่องจากใบแจ้งที่เปิดอยู่
   src/statistics      สถิติหน้า dashboard              src/notifications การแจ้งเตือนในระบบ
   src/profiles        รูปโปรไฟล์ · รายชื่อบุคคลจาก Core Hub · แต่งตั้งช่าง
@@ -36,7 +39,7 @@ backend/    NestJS 11 + Prisma 7 (PostgreSQL ของระบบนี้เ�
   prisma/             schema, migrations, seed.ts (ประเภทอุปกรณ์ 10 ประเภท + ห้องของสาขา 8 ห้อง)
   openapi.json        สร้างจากโค้ด (pnpm --filter backend generate:openapi)
 frontend/   Next.js 16 App Router + Tailwind v4 (template csmju-subsystem-web ของ standards)
-  src/app             หน้า: / · buildings · rooms/[id] (+ qr) · equipment/[id] · requests · queue · board · dashboard · profile · q/[code] · admin/*
+  src/app             หน้า: / · buildings · rooms/[id] (+ qr) · equipment/[id] · requests · queue · board · dashboard · profile · faq · q/[code] · admin/*
   src/csmju           ของกลางจาก standards/templates/csmju-subsystem-web (AppShell, โลโก้, ปุ่ม, ไอคอน) — ห้ามแก้
   src/components/ui   local component ที่ template ยังไม่มี (import ทุกอย่างผ่าน @/components/ui)
   src/lib             API client (คุกกี้ HttpOnly ผ่าน origin เดียวกัน) · silent re-SSO · ชนิดข้อมูลจาก openapi.json
@@ -123,3 +126,7 @@ docker compose down                 # หยุด (ข้อมูลยัง�
 คำอธิบายทุกตัวอยู่ใน [.env.example](.env.example) — ที่สำคัญคือ `DATABASE_URL` (ของระบบนี้เท่านั้น),
 `CORE_HUB_URL` / `CORE_HUB_JWKS_URL` / `CORE_HUB_WEB_URL`, `SUBSYSTEM_ID=csmju-maintenance-request`,
 `BACKEND_URL` และ `NEXT_PUBLIC_CORE_HUB_URL`
+
+ผู้ช่วย FAQ ใช้ `FAQ_AI_API_KEY`, `FAQ_AI_RESPONSES_URL` และ `FAQ_AI_MODEL` เมื่อเชื่อม AI provider; หากไม่ใส่ API key
+ระบบจะค้นคำตอบจาก FAQ ในเครื่อง ข้อความคำถามที่ส่งไปยัง provider จะไม่รวมข้อมูลโปรไฟล์หรือประวัติใบแจ้งซ่อม
+และระบบซ่อนรูปแบบอีเมล เบอร์โทร และเลข 13 หลักก่อนส่ง

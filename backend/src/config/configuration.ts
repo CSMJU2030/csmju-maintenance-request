@@ -11,6 +11,11 @@ export interface AppConfig {
   subsystemName: string;
   /** อีเมลบัญชี Core Hub (core role staff/lecturer) ที่เป็นผู้ดูแลระบบแจ้งซ่อม — ADMIN_ACCOUNTS */
   adminAccounts: string[];
+  faqAssistant: {
+    apiKey: string;
+    responsesUrl: string;
+    model: string;
+  };
   coreHub: {
     url: string;
     /** Core Hub's web app, where /auth/login and /auth/logout send the browser. */
@@ -43,6 +48,11 @@ export default (): AppConfig => {
     subsystemId: process.env.SUBSYSTEM_ID ?? 'csmju-maintenance-request',
     subsystemName: process.env.SUBSYSTEM_NAME ?? 'ระบบแจ้งซ่อม',
     adminAccounts: parseAdminAccounts(process.env.ADMIN_ACCOUNTS),
+    faqAssistant: {
+      apiKey: process.env.FAQ_AI_API_KEY?.trim() ?? '',
+      responsesUrl: process.env.FAQ_AI_RESPONSES_URL?.trim() ?? '',
+      model: process.env.FAQ_AI_MODEL?.trim() || 'gpt-5-mini',
+    },
     coreHub: {
       url: coreHubUrl,
       // On the real server the web app and the API share one origin.
