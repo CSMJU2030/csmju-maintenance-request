@@ -15,7 +15,7 @@ type Message = {
 };
 
 const FAQ_CATEGORIES = [
-  { id: 'all', label: 'ภาพรวม' },
+  { id: 'all', label: 'ภาพรวม', faqIds: undefined },
   { id: 'request', label: 'การแจ้งซ่อม', faqIds: ['report-repair', 'duplicate-request', 'scan-qr'] },
   {
     id: 'tracking',
